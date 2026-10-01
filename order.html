@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>اطلب موقعك | Site Web</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="order.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+  <div class="background"></div>
+
+  <header class="header">
+
+    <a href="index.html" class="logo">
+      SITE WEB
+    </a>
+
+    <a href="index.html" class="back">
+      ← الرجوع للموقع
+    </a>
+
+  </header>
+
+
+  <main class="order-page">
+
+    <div class="order-container">
+
+      <div class="order-heading">
+
+        <span>START YOUR PROJECT</span>
+
+        <h1>
+          اطلب موقعك
+        </h1>
+
+        <p>
+          عمر المعلومات التالية، واشرحلي فكرتك، ونشوف معاك الموقع المناسب لمشروعك.
+        </p>
+
+      </div>
+
+
+      <form id="orderForm" class="order-form">
+
+        <!-- PERSONAL -->
+
+        <div class="form-section">
+
+          <h2>معلوماتك</h2>
+
+          <div class="grid">
+
+            <div class="field">
+              <label>الاسم الكامل *</label>
+
+              <input
+                id="fullName"
+                type="text"
+                placeholder="اسمك الكامل"
+                required
+              >
+            </div>
+
+
+            <div class="field">
+              <label>رقم الهاتف / WhatsApp *</label>
+
+              <input
+                id="phone"
+                type="tel"
+                placeholder="07xxxxxxxx"
+                required
+              >
+            </div>
+
+
+            <div class="field">
+              <label>Email</label>
+
+              <input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+              >
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- BUSINESS -->
+
+        <div class="form-section">
+
+          <h2>معلومات المشروع</h2>
+
+          <div class="grid">
+
+            <div class="field">
+
+              <label>اسم المشروع / النشاط</label>
+
+              <input
+                id="businessName"
+                type="text"
+                placeholder="مثال: VENOM"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>نوع النشاط</label>
+
+              <input
+                id="businessType"
+                type="text"
+                placeholder="ملابس، مطعم، خدمات..."
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>نوع الموقع</label>
+
+              <select id="websiteType">
+
+                <option value="">اختر نوع الموقع</option>
+
+                <option value="Landing Page">
+                  Landing Page
+                </option>
+
+                <option value="Site vitrine">
+                  Site vitrine
+                </option>
+
+                <option value="Portfolio">
+                  Portfolio
+                </option>
+
+                <option value="E-commerce">
+                  متجر إلكتروني
+                </option>
+
+                <option value="Custom">
+                  موقع مخصص
+                </option>
+
+                <option value="Other">
+                  شيء آخر
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                اشرح فكرتك بالتفصيل *
+              </label>
+
+              <textarea
+                id="idea"
+                rows="6"
+                placeholder="واش حاب يكون في الموقع؟ واش تبيع أو تقدم؟ كيف تحب الموقع يخدم؟"
+                required
+              ></textarea>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- WEBSITE -->
+
+        <div class="form-section">
+
+          <h2>تفاصيل الموقع</h2>
+
+          <div class="grid">
+
+            <div class="field full">
+
+              <label>
+                الصفحات المطلوبة
+              </label>
+
+              <input
+                id="pages"
+                type="text"
+                placeholder="الرئيسية، المنتجات، من نحن، التواصل..."
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                المزايا التي تريدها
+              </label>
+
+              <textarea
+                id="features"
+                rows="5"
+                placeholder="مثال: طلبات، WhatsApp، Admin Panel، منتجات، تسجيل دخول..."
+              ></textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>الميزانية التقريبية</label>
+
+              <select id="budget">
+
+                <option value="">اختر</option>
+
+                <option value="أقل من 5000 DA">
+                  أقل من 5,000 DA
+                </option>
+
+                <option value="5000 - 10000 DA">
+                  5,000 - 10,000 DA
+                </option>
+
+                <option value="10000 - 20000 DA">
+                  10,000 - 20,000 DA
+                </option>
+
+                <option value="أكثر من 20000 DA">
+                  أكثر من 20,000 DA
+                </option>
+
+                <option value="لا أعرف">
+                  لا أعرف بعد
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>متى تحتاج الموقع؟</label>
+
+              <input
+                id="deadline"
+                type="text"
+                placeholder="مثال: خلال أسبوع"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>Instagram</label>
+
+              <input
+                id="instagram"
+                type="text"
+                placeholder="@username"
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label>رابط مثال يعجبك</label>
+
+              <input
+                id="referenceUrl"
+                type="url"
+                placeholder="https://..."
+              >
+
+            </div>
+
+
+            <div class="field full">
+
+              <label>
+                ملاحظات إضافية
+              </label>
+
+              <textarea
+                id="notes"
+                rows="5"
+                placeholder="ألوان، تصميم، أفكار، أي شيء آخر..."
+              ></textarea>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <button
+          id="submitOrder"
+          type="submit"
+          class="submit-btn"
+        >
+          إرسال الطلب 🚀
+        </button>
+
+
+        <div
+          id="orderMessage"
+          class="order-message"
+        ></div>
+
+      </form>
+
+    </div>
+
+  </main>
+
+
+  <script src="order.js"></script>
+
+</body>
+</html>
