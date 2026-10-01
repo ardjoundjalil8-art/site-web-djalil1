@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Site Web</title>
+  <meta
+    name="description"
+    content="مواقع ويب احترافية ومتجاوبة مع الهاتف والكمبيوتر."
+  >
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container nav">
+
+      <a href="#home" class="logo" id="logoText">
+        SITE WEB
+      </a>
+
+      <nav class="nav-links">
+        <a href="#home">الرئيسية</a>
+        <a href="#about">من أنا</a>
+        <a href="#services">الخدمات</a>
+        <a href="#projects">المشاريع</a>
+        <a href="#contact">تواصل معي</a>
+      </nav>
+
+      <a
+        id="navWhatsapp"
+        class="nav-cta"
+        href="#contact"
+      >
+        اطلب موقعك
+      </a>
+
+      <button
+        id="menuBtn"
+        class="menu-btn"
+        aria-label="فتح القائمة"
+      >
+        ☰
+      </button>
+
+    </div>
+
+    <div id="mobileMenu" class="mobile-menu">
+      <a href="#home">الرئيسية</a>
+      <a href="#about">من أنا</a>
+      <a href="#services">الخدمات</a>
+      <a href="#projects">المشاريع</a>
+      <a href="#contact">تواصل معي</a>
+    </div>
+  </header>
+
+
+  <main>
+
+    <!-- HERO -->
+    <section id="home" class="hero section">
+
+      <div class="hero-bg"></div>
+
+      <div class="container hero-grid">
+
+        <div class="hero-content">
+
+          <span class="eyebrow">WEB DEVELOPMENT</span>
+
+          <h1 id="heroTitle">
+            نبني لك موقعك باحتراف
+          </h1>
+
+          <p id="heroDescription">
+            مواقع ويب احترافية وسريعة ومتجاوبة مع الهاتف والكمبيوتر.
+          </p>
+
+          <div class="hero-buttons">
+
+            <a
+              id="heroWhatsapp"
+              href="#contact"
+              class="btn btn-primary"
+            >
+              اطلب موقعك الآن
+            </a>
+
+            <a
+              href="#projects"
+              class="btn btn-secondary"
+            >
+              شوف أعمالي
+            </a>
+
+          </div>
+
+          <div class="hero-stats">
+
+            <div>
+              <strong>01</strong>
+              <span>تصميم احترافي</span>
+            </div>
+
+            <div>
+              <strong>02</strong>
+              <span>متجاوب مع الهاتف</span>
+            </div>
+
+            <div>
+              <strong>03</strong>
+              <span>رابط خاص بموقعك</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="hero-visual">
+
+          <div class="glow glow-1"></div>
+          <div class="glow glow-2"></div>
+
+          <div class="browser-card">
+
+            <div class="browser-top">
+              <div class="dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <div class="browser-address">
+                yourwebsite.com
+              </div>
+            </div>
+
+            <div class="browser-screen">
+
+              <div class="screen-top"></div>
+
+              <div class="screen-title">
+                <span></span>
+                <span></span>
+              </div>
+
+              <div class="screen-cards">
+
+                <div></div>
+                <div></div>
+                <div></div>
+
+              </div>
+
+              <div class="screen-button"></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ABOUT -->
+    <section
+      id="about"
+      class="section section-dark"
+    >
+
+      <div class="container">
+
+        <div class="section-heading">
+
+          <span class="eyebrow">ABOUT</span>
+
+          <h2 id="aboutTitle">
+            من أنا
+          </h2>
+
+        </div>
+
+
+        <div class="about-grid">
+
+          <div class="about-image-wrap">
+
+            <div class="about-glow"></div>
+
+            <img
+              id="profileImage"
+              class="about-image"
+              src=""
+              alt="Profile"
+            >
+
+          </div>
+
+
+          <div class="about-content">
+
+            <h3 id="aboutName">
+              Djalil
+            </h3>
+
+            <p id="aboutText">
+              مطور مواقع ويب أعمل على إنشاء مواقع عصرية وسريعة
+              ومناسبة لمختلف أنواع المشاريع.
+            </p>
+
+            <div class="about-info">
+
+              <div>
+                <span>WhatsApp</span>
+                <strong id="aboutWhatsapp">0782106656</strong>
+              </div>
+
+              <div>
+                <span>Email</span>
+                <strong id="aboutEmail">
+                  ardjoundjalil8@gmail.com
+                </strong>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SERVICES -->
+    <section id="services" class="section">
+
+      <div class="container">
+
+        <div class="section-heading center">
+
+          <span class="eyebrow">SERVICES</span>
+
+          <h2>الخدمات</h2>
+
+          <p>
+            خدمات رقمية تساعدك على تقديم مشروعك بشكل احترافي.
+          </p>
+
+        </div>
+
+
+        <div id="servicesGrid" class="services-grid">
+
+          <div class="loading">
+            جاري تحميل الخدمات...
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PROJECTS -->
+    <section
+      id="projects"
+      class="section section-dark"
+    >
+
+      <div class="container">
+
+        <div class="section-heading center">
+
+          <span class="eyebrow">PORTFOLIO</span>
+
+          <h2>المشاريع</h2>
+
+          <p>
+            بعض المشاريع والأعمال التي قمت بإنجازها.
+          </p>
+
+        </div>
+
+
+        <div id="projectsGrid" class="projects-grid">
+
+          <div class="loading">
+            جاري تحميل المشاريع...
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CTA -->
+    <section class="cta-section">
+
+      <div class="container">
+
+        <div class="cta-box">
+
+          <div>
+            <span class="eyebrow">START A PROJECT</span>
+
+            <h2>
+              عندك مشروع وتحتاج موقع؟
+            </h2>
+
+            <p>
+              ابعثلي فكرتك ونشوف كيفاش نقدر نحولها لموقع احترافي.
+            </p>
+          </div>
+
+          <a
+            id="ctaWhatsapp"
+            href="#contact"
+            class="btn btn-primary"
+          >
+            تحدث معي
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CONTACT -->
+    <section
+      id="contact"
+      class="section"
+    >
+
+      <div class="container">
+
+        <div class="section-heading center">
+
+          <span class="eyebrow">CONTACT</span>
+
+          <h2>تواصل معي</h2>
+
+          <p>
+            املأ المعلومات وسأتمكن من التواصل معك.
+          </p>
+
+        </div>
+
+
+        <div class="contact-grid">
+
+          <div class="contact-card">
+
+            <div class="contact-item">
+
+              <div class="contact-icon">📱</div>
+
+              <div>
+                <span>WhatsApp</span>
+                <a id="contactWhatsapp" href="#">
+                  0782106656
+                </a>
+              </div>
+
+            </div>
+
+
+            <div class="contact-item">
+
+              <div class="contact-icon">✉️</div>
+
+              <div>
+                <span>Email</span>
+                <a id="contactEmail" href="#">
+                  ardjoundjalil8@gmail.com
+                </a>
+              </div>
+
+            </div>
+
+
+            <div class="contact-item">
+
+              <div class="contact-icon">📸</div>
+
+              <div>
+                <span>Instagram</span>
+                <a
+                  id="contactInstagram"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Instagram
+                </a>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <form id="contactForm" class="contact-form">
+
+            <div class="form-row">
+
+              <div class="field">
+                <label for="clientName">الاسم</label>
+                <input
+                  id="clientName"
+                  type="text"
+                  placeholder="اكتب اسمك"
+                  required
+                >
+              </div>
+
+              <div class="field">
+                <label for="clientPhone">رقم الهاتف</label>
+                <input
+                  id="clientPhone"
+                  type="tel"
+                  placeholder="07xxxxxxxx"
+                  required
+                >
+              </div>
+
+            </div>
+
+
+            <div class="field">
+              <label for="clientEmail">Email</label>
+              <input
+                id="clientEmail"
+                type="email"
+                placeholder="example@email.com"
+              >
+            </div>
+
+
+            <div class="field">
+              <label for="clientMessage">رسالتك</label>
+              <textarea
+                id="clientMessage"
+                rows="6"
+                placeholder="اشرح لي المشروع الذي تحتاجه..."
+                required
+              ></textarea>
+            </div>
+
+
+            <button
+              id="contactSubmit"
+              type="submit"
+              class="btn btn-primary full-btn"
+            >
+              إرسال الرسالة
+            </button>
+
+            <div id="contactMessage"></div>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="footer">
+
+    <div class="container footer-inner">
+
+      <div>
+        <div class="footer-logo" id="footerLogo">
+          SITE WEB
+        </div>
+
+        <p>
+          © <span id="year"></span> جميع الحقوق محفوظة.
+        </p>
+      </div>
+
+      <a href="#home">
+        ↑ العودة للأعلى
+      </a>
+
+    </div>
+
+  </footer>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
