@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin | Site Web</title>
+
+  <link rel="stylesheet" href="admin.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginPage" class="login-page">
+
+    <div class="login-box">
+
+      <div class="login-logo">SITE WEB</div>
+
+      <h1>Admin Panel</h1>
+      <p>تسجيل الدخول إلى لوحة التحكم</p>
+
+      <form id="loginForm">
+
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="Email"
+          required
+        >
+
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+          required
+        >
+
+        <button type="submit">
+          تسجيل الدخول
+        </button>
+
+      </form>
+
+      <div id="loginError"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ADMIN -->
+  <div id="adminPage" class="admin-page hidden">
+
+    <aside class="sidebar">
+
+      <div class="brand">
+        SITE WEB
+      </div>
+
+      <button class="nav-btn active" data-section="dashboard">
+        🏠 الرئيسية
+      </button>
+
+      <button class="nav-btn" data-section="settings">
+        ⚙️ معلومات الموقع
+      </button>
+
+      <button class="nav-btn" data-section="services">
+        💻 الخدمات
+      </button>
+
+      <button class="nav-btn" data-section="projects">
+        🖼️ المشاريع
+      </button>
+
+      <button class="nav-btn" data-section="messages">
+        💬 الرسائل
+      </button>
+
+      <button id="logoutBtn" class="logout-btn">
+        🚪 تسجيل الخروج
+      </button>
+
+    </aside>
+
+
+    <main class="main">
+
+      <header class="topbar">
+
+        <div>
+          <h2 id="pageTitle">الرئيسية</h2>
+          <span>لوحة تحكم Site Web</span>
+        </div>
+
+        <div class="admin-user">
+          Admin
+        </div>
+
+      </header>
+
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="section active-section">
+
+        <div class="welcome-card">
+
+          <h1>مرحبًا بك 👋</h1>
+
+          <p>
+            من هنا تستطيع التحكم في محتوى موقعك بالكامل.
+          </p>
+
+        </div>
+
+        <div class="stats">
+
+          <div class="stat-card">
+            <span>الخدمات</span>
+            <strong id="servicesCount">0</strong>
+          </div>
+
+          <div class="stat-card">
+            <span>المشاريع</span>
+            <strong id="projectsCount">0</strong>
+          </div>
+
+          <div class="stat-card">
+            <span>الرسائل</span>
+            <strong id="messagesCount">0</strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SETTINGS -->
+      <section id="settings" class="section">
+
+        <div class="section-header">
+          <div>
+            <h2>معلومات الموقع</h2>
+            <p>كل المعلومات التي تظهر في الموقع.</p>
+          </div>
+        </div>
+
+        <form id="settingsForm" class="form-card">
+
+          <div class="form-grid">
+
+            <div class="field">
+              <label>اسم الموقع</label>
+              <input id="site_name" type="text">
+            </div>
+
+            <div class="field">
+              <label>اسمك</label>
+              <input id="owner_name" type="text">
+            </div>
+
+            <div class="field full">
+              <label>العنوان الرئيسي</label>
+              <input id="hero_title" type="text">
+            </div>
+
+            <div class="field full">
+              <label>وصف الصفحة الرئيسية</label>
+              <textarea id="hero_description"></textarea>
+            </div>
+
+            <div class="field">
+              <label>عنوان قسم من أنا</label>
+              <input id="about_title" type="text">
+            </div>
+
+            <div class="field">
+              <label>WhatsApp</label>
+              <input id="whatsapp" type="text">
+            </div>
+
+            <div class="field">
+              <label>Email</label>
+              <input id="email" type="email">
+            </div>
+
+            <div class="field">
+              <label>Instagram</label>
+              <input id="instagram_url" type="url">
+            </div>
+
+            <div class="field full">
+              <label>نبذة عني</label>
+              <textarea id="about_text"></textarea>
+            </div>
+
+            <div class="field full">
+              <label>رابط الشعار Logo</label>
+              <input id="logo_url" type="url">
+            </div>
+
+            <div class="field full">
+              <label>رابط صورة البروفايل</label>
+              <input id="profile_image_url" type="url">
+            </div>
+
+          </div>
+
+          <div class="visibility-box">
+
+            <label>
+              <input id="show_services" type="checkbox">
+              إظهار الخدمات
+            </label>
+
+            <label>
+              <input id="show_portfolio" type="checkbox">
+              إظهار المشاريع
+            </label>
+
+            <label>
+              <input id="show_about" type="checkbox">
+              إظهار قسم من أنا
+            </label>
+
+            <label>
+              <input id="show_contact" type="checkbox">
+              إظهار التواصل
+            </label>
+
+          </div>
+
+          <button class="save-btn" type="submit">
+            💾 حفظ التغييرات
+          </button>
+
+          <div id="settingsMessage"></div>
+
+        </form>
+
+      </section>
+
+
+      <!-- SERVICES -->
+      <section id="services" class="section">
+
+        <div class="section-header">
+
+          <div>
+            <h2>الخدمات</h2>
+            <p>أضف الخدمات التي تقدمها.</p>
+          </div>
+
+          <button id="addServiceBtn" class="primary-btn">
+            + إضافة خدمة
+          </button>
+
+        </div>
+
+        <div id="servicesList" class="items-list"></div>
+
+      </section>
+
+
+      <!-- PROJECTS -->
+      <section id="projects" class="section">
+
+        <div class="section-header">
+
+          <div>
+            <h2>المشاريع</h2>
+            <p>أضف أعمالك ومشاريعك.</p>
+          </div>
+
+          <button id="addProjectBtn" class="primary-btn">
+            + إضافة مشروع
+          </button>
+
+        </div>
+
+        <div id="projectsList" class="items-list"></div>
+
+      </section>
+
+
+      <!-- MESSAGES -->
+      <section id="messages" class="section">
+
+        <div class="section-header">
+
+          <div>
+            <h2>رسائل العملاء</h2>
+            <p>الرسائل التي يرسلها الزوار من الموقع.</p>
+          </div>
+
+        </div>
+
+        <div id="messagesList" class="messages-list"></div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- SERVICE MODAL -->
+  <div id="serviceModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-modal" onclick="closeServiceModal()">×</button>
+
+      <h2 id="serviceModalTitle">إضافة خدمة</h2>
+
+      <form id="serviceForm">
+
+        <input type="hidden" id="serviceId">
+
+        <label>اسم الخدمة</label>
+        <input id="serviceTitle" required>
+
+        <label>الوصف</label>
+        <textarea id="serviceDescription"></textarea>
+
+        <label>السعر</label>
+        <input id="servicePrice" placeholder="مثال: ابتداءً من 5000 DA">
+
+        <label>Icon</label>
+        <input id="serviceIcon" placeholder="💻">
+
+        <label>رابط الصورة</label>
+        <input id="serviceImage">
+
+        <button class="save-btn">
+          حفظ الخدمة
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- PROJECT MODAL -->
+  <div id="projectModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-modal" onclick="closeProjectModal()">×</button>
+
+      <h2 id="projectModalTitle">إضافة مشروع</h2>
+
+      <form id="projectForm">
+
+        <input type="hidden" id="projectId">
+
+        <label>اسم المشروع</label>
+        <input id="projectTitle" required>
+
+        <label>الوصف</label>
+        <textarea id="projectDescription"></textarea>
+
+        <label>التصنيف</label>
+        <input id="projectCategory" placeholder="Website">
+
+        <label>رابط الصورة</label>
+        <input id="projectImage">
+
+        <label>رابط المشروع</label>
+        <input id="projectUrl">
+
+        <button class="save-btn">
+          حفظ المشروع
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <script src="admin.js"></script>
+
+</body>
+</html>
