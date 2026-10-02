@@ -1,7 +1,3 @@
-/* =========================================================
-   SUPABASE
-========================================================= */
-
 const SUPABASE_URL =
   "https://zpwxmpznlqprzcumuvkj.supabase.co";
 
@@ -15,9 +11,9 @@ const supabaseClient =
   );
 
 
-/* =========================================================
+/* =========================================
    HELPERS
-========================================================= */
+========================================= */
 
 function escapeHTML(value) {
 
@@ -37,38 +33,17 @@ function escapeHTML(value) {
 }
 
 
-function whatsappURL(number) {
-
-  let value =
-    String(number || "")
-      .replace(/\D/g, "");
-
-  if (
-    value.startsWith("0")
-  ) {
-    value =
-      "213" +
-      value.substring(1);
-  }
-
-  if (
-    !value.startsWith("213")
-  ) {
-    value =
-      "213" +
-      value;
-  }
-
-  return `https://wa.me/${value}`;
-
+function show(element) {
+  element.classList.remove("hidden");
 }
 
 
-function setResult(
-  element,
-  text,
-  type = ""
-) {
+function hide(element) {
+  element.classList.add("hidden");
+}
+
+
+function notify(element, text, type = "") {
 
   element.textContent = text;
 
@@ -78,1088 +53,257 @@ function setResult(
 }
 
 
-function openModal(element) {
+function formatDate(date) {
 
-  element.classList.remove("hidden");
-
-  document.body.classList.add("locked");
-
-}
-
-
-function closeModal(element) {
-
-  element.classList.add("hidden");
-
-  document.body.classList.remove("locked");
-
-}
-
-
-/* =========================================================
-   DOM
-========================================================= */
-
-const logoText =
-  document.getElementById("logoText");
-
-const footerLogo =
-  document.getElementById("footerLogo");
-
-const heroTitle =
-  document.getElementById("heroTitle");
-
-const heroDescription =
-  document.getElementById("heroDescription");
-
-const aboutTitle =
-  document.getElementById("aboutTitle");
-
-const aboutName =
-  document.getElementById("aboutName");
-
-const aboutText =
-  document.getElementById("aboutText");
-
-const aboutWhatsapp =
-  document.getElementById("aboutWhatsapp");
-
-const aboutEmail =
-  document.getElementById("aboutEmail");
-
-const profileImage =
-  document.getElementById("profileImage");
-
-const headerWhatsapp =
-  document.getElementById("headerWhatsapp");
-
-const mobileWhatsapp =
-  document.getElementById("mobileWhatsapp");
-
-const heroWhatsapp =
-  document.getElementById("heroWhatsapp");
-
-const contactWhatsapp =
-  document.getElementById("contactWhatsapp");
-
-const contactEmail =
-  document.getElementById("contactEmail");
-
-const contactInstagram =
-  document.getElementById("contactInstagram");
-
-const servicesGrid =
-  document.getElementById("servicesGrid");
-
-const projectsGrid =
-  document.getElementById("projectsGrid");
-
-const year =
-  document.getElementById("year");
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-const menuBtn =
-  document.getElementById("menuBtn");
-
-const mobileMenu =
-  document.getElementById("mobileMenu");
-
-
-menuBtn.addEventListener(
-  "click",
-  () => {
-
-    mobileMenu.classList.toggle(
-      "open"
-    );
-
-  }
-);
-
-
-document
-  .querySelectorAll(
-    "#mobileMenu a"
-  )
-  .forEach((link) => {
-
-    link.addEventListener(
-      "click",
-      () => {
-
-        mobileMenu.classList.remove(
-          "open"
-        );
-
-      }
-    );
-
-  });
-
-
-/* =========================================================
-   LOAD SETTINGS
-========================================================= */
-
-async function loadPublicSettings() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("site_settings")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      "Settings:",
-      error
-    );
-
-    return;
-
+  if (!date) {
+    return "";
   }
 
-
-  if (!data) {
-    return;
-  }
-
-
-  /* TEXT */
-
-  logoText.textContent =
-    data.site_name ||
-    "SITE WEB";
-
-  footerLogo.textContent =
-    data.site_name ||
-    "SITE WEB";
-
-  document.title =
-    data.site_name ||
-    "Site Web";
-
-
-  heroTitle.textContent =
-    data.hero_title || "";
-
-  heroDescription.textContent =
-    data.hero_description || "";
-
-  aboutTitle.textContent =
-    data.about_title ||
-    "من أنا";
-
-  aboutName.textContent =
-    data.owner_name || "";
-
-  aboutText.textContent =
-    data.about_text || "";
-
-
-  /* CONTACT */
-
-  const whatsapp =
-    data.whatsapp || "";
-
-  const email =
-    data.email || "";
-
-  const instagram =
-    data.instagram_url || "";
-
-
-  const wa =
-    whatsappURL(
-      whatsapp
-    );
-
-
-  headerWhatsapp.href =
-    whatsapp
-      ? wa
-      : "#";
-
-
-  mobileWhatsapp.href =
-    whatsapp
-      ? wa
-      : "#";
-
-
-  heroWhatsapp.href =
-    whatsapp
-      ? wa
-      : "#";
-
-
-  contactWhatsapp.textContent =
-    whatsapp ||
-    "WhatsApp";
-
-  contactWhatsapp.href =
-    whatsapp
-      ? wa
-      : "#";
-
-
-  aboutWhatsapp.textContent =
-    whatsapp;
-
-
-  contactEmail.textContent =
-    email ||
-    "Email";
-
-  contactEmail.href =
-    email
-      ? `mailto:${email}`
-      : "#";
-
-
-  aboutEmail.textContent =
-    email;
-
-
-  contactInstagram.textContent =
-    instagram
-      ? "فتح Instagram"
-      : "Instagram";
-
-  contactInstagram.href =
-    instagram ||
-    "#";
-
-
-  /* PROFILE */
-
-  if (
-    data.profile_image_url
-  ) {
-
-    profileImage.src =
-      data.profile_image_url;
-
-    profileImage.style.display =
-      "block";
-
-  } else {
-
-    profileImage.style.display =
-      "none";
-
-  }
-
-
-  /* COLORS */
-
-  if (
-    data.primary_color
-  ) {
-
-    document.documentElement
-      .style
-      .setProperty(
-        "--primary",
-        data.primary_color
-      );
-
-  }
-
-
-  if (
-    data.secondary_color
-  ) {
-
-    document.documentElement
-      .style
-      .setProperty(
-        "--secondary",
-        data.secondary_color
-      );
-
-  }
-
-
-  /* VISIBILITY */
-
-  document.getElementById(
-    "about"
-  ).style.display =
-    data.show_about === false
-      ? "none"
-      : "";
-
-
-  document.getElementById(
-    "services"
-  ).style.display =
-    data.show_services === false
-      ? "none"
-      : "";
-
-
-  document.getElementById(
-    "projects"
-  ).style.display =
-    data.show_portfolio === false
-      ? "none"
-      : "";
-
-
-  document.getElementById(
-    "contact"
-  ).style.display =
-    data.show_contact === false
-      ? "none"
-      : "";
-
-}
-
-
-/* =========================================================
-   SERVICES PUBLIC
-========================================================= */
-
-async function loadPublicServices() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("services")
-      .select("*")
-      .eq("is_visible", true)
-      .order(
-        "sort_order",
-        {
-          ascending: true
-        }
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Services:",
-      error
-    );
-
-    servicesGrid.innerHTML =
-      `
-        <div class="empty">
-          حدث خطأ أثناء تحميل الخدمات.
-        </div>
-      `;
-
-    return;
-
-  }
-
-
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    servicesGrid.innerHTML =
-      `
-        <div class="empty">
-          لا توجد خدمات مضافة حاليًا.
-        </div>
-      `;
-
-    return;
-
-  }
-
-
-  servicesGrid.innerHTML =
-    data
-      .map((service) => {
-
-        const image =
-          service.image_url
-            ? `
-              <img
-                class="service-image"
-                src="${escapeHTML(
-                  service.image_url
-                )}"
-                alt="${escapeHTML(
-                  service.title
-                )}"
-              >
-            `
-            : "";
-
-
-        return `
-          <article class="service-card">
-
-            ${image}
-
-            <div class="service-icon">
-              ${escapeHTML(
-                service.icon ||
-                "💻"
-              )}
-            </div>
-
-            <h3>
-              ${escapeHTML(
-                service.title
-              )}
-            </h3>
-
-            <p>
-              ${escapeHTML(
-                service.description ||
-                ""
-              )}
-            </p>
-
-            ${
-              service.price
-                ? `
-                  <div class="service-price">
-                    ${escapeHTML(
-                      service.price
-                    )}
-                  </div>
-                `
-                : ""
-            }
-
-          </article>
-        `;
-
-      })
-      .join("");
-
-}
-
-
-/* =========================================================
-   PROJECTS PUBLIC
-========================================================= */
-
-async function loadPublicProjects() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("projects")
-      .select("*")
-      .eq("is_visible", true)
-      .order(
-        "sort_order",
-        {
-          ascending: true
-        }
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Projects:",
-      error
-    );
-
-    projectsGrid.innerHTML =
-      `
-        <div class="empty">
-          حدث خطأ أثناء تحميل المشاريع.
-        </div>
-      `;
-
-    return;
-
-  }
-
-
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    projectsGrid.innerHTML =
-      `
-        <div class="empty">
-          لا توجد مشاريع مضافة حاليًا.
-        </div>
-      `;
-
-    return;
-
-  }
-
-
-  projectsGrid.innerHTML =
-    data
-      .map((project) => {
-
-        const image =
-          project.image_url
-            ? `
-              <img
-                class="project-image"
-                src="${escapeHTML(
-                  project.image_url
-                )}"
-                alt="${escapeHTML(
-                  project.title
-                )}"
-              >
-            `
-            : `
-              <div class="project-image"></div>
-            `;
-
-
-        const link =
-          project.project_url
-            ? `
-              <a
-                class="project-link"
-                href="${escapeHTML(
-                  project.project_url
-                )}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                مشاهدة المشروع ↗
-              </a>
-            `
-            : "";
-
-
-        return `
-          <article class="project-card">
-
-            ${image}
-
-            <div class="project-content">
-
-              ${
-                project.category
-                  ? `
-                    <div class="project-category">
-                      ${escapeHTML(
-                        project.category
-                      )}
-                    </div>
-                  `
-                  : ""
-              }
-
-              <h3>
-                ${escapeHTML(
-                  project.title
-                )}
-              </h3>
-
-              <p>
-                ${escapeHTML(
-                  project.description ||
-                  ""
-                )}
-              </p>
-
-              ${link}
-
-            </div>
-
-          </article>
-        `;
-
-      })
-      .join("");
-
-}
-
-
-/* =========================================================
-   CONTACT FORM
-========================================================= */
-
-const contactForm =
-  document.getElementById(
-    "contactForm"
+  return new Date(
+    date
+  ).toLocaleString(
+    "fr-DZ"
   );
 
-const contactResult =
+}
+
+
+function toWhatsApp(phone) {
+
+  let value =
+    String(phone || "")
+      .replace(/\D/g, "");
+
+  if (value.startsWith("0")) {
+    value = "213" + value.slice(1);
+  }
+
+  if (!value.startsWith("213")) {
+    value = "213" + value;
+  }
+
+  return `https://wa.me/${value}`;
+}
+
+
+/* =========================================
+   IMAGE UPLOAD
+========================================= */
+
+async function uploadImage(
+  file,
+  folder
+) {
+
+  if (!file) {
+    return null;
+  }
+
+
+  if (!file.type.startsWith("image/")) {
+
+    throw new Error(
+      "الملف ليس صورة."
+    );
+
+  }
+
+
+  if (
+    file.size >
+    5 * 1024 * 1024
+  ) {
+
+    throw new Error(
+      "حجم الصورة أكبر من 5MB."
+    );
+
+  }
+
+
+  const extension =
+    file.name.includes(".")
+      ? file.name
+          .split(".")
+          .pop()
+          .toLowerCase()
+      : "jpg";
+
+
+  const fileName =
+    `${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 9)}.${extension}`;
+
+
+  const path =
+    `${folder}/${fileName}`;
+
+
+  const {
+    error
+  } =
+    await supabaseClient.storage
+      .from("site-images")
+      .upload(
+        path,
+        file,
+        {
+          cacheControl: "3600",
+          upsert: false
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  const {
+    data
+  } =
+    supabaseClient.storage
+      .from("site-images")
+      .getPublicUrl(path);
+
+
+  return data.publicUrl;
+
+}
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+const loginPage =
   document.getElementById(
-    "contactResult"
+    "loginPage"
+  );
+
+const adminApp =
+  document.getElementById(
+    "adminApp"
+  );
+
+const loginForm =
+  document.getElementById(
+    "loginForm"
+  );
+
+const loginError =
+  document.getElementById(
+    "loginError"
   );
 
 
-contactForm.addEventListener(
+async function checkAdmin() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "is_admin"
+    );
+
+
+  if (error) {
+
+    console.error(error);
+
+    return false;
+
+  }
+
+
+  return data === true;
+
+}
+
+
+async function checkSession() {
+
+  const {
+    data: {
+      session
+    }
+  } =
+    await supabaseClient.auth
+      .getSession();
+
+
+  if (!session) {
+
+    hide(adminApp);
+    show(loginPage);
+
+    return;
+
+  }
+
+
+  const admin =
+    await checkAdmin();
+
+
+  if (!admin) {
+
+    await supabaseClient.auth
+      .signOut();
+
+    hide(adminApp);
+    show(loginPage);
+
+    loginError.textContent =
+      "هذا الحساب ليس Admin.";
+
+    return;
+
+  }
+
+
+  show(adminApp);
+  hide(loginPage);
+
+  await loadEverything();
+
+}
+
+
+loginForm.addEventListener(
   "submit",
   async (event) => {
 
     event.preventDefault();
 
 
-    const button =
-      document.getElementById(
-        "contactSubmit"
-      );
-
-
-    button.disabled = true;
-
-    button.textContent =
-      "جاري الإرسال...";
-
-
-    const name =
-      document
-        .getElementById(
-          "clientName"
-        )
-        .value
-        .trim();
-
-
-    const phone =
-      document
-        .getElementById(
-          "clientPhone"
-        )
-        .value
-        .trim();
+    loginError.textContent =
+      "";
 
 
     const email =
       document
         .getElementById(
-          "clientEmail"
+          "loginEmail"
         )
         .value
         .trim();
-
-
-    const message =
-      document
-        .getElementById(
-          "clientMessage"
-        )
-        .value
-        .trim();
-
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("messages")
-        .insert([{
-
-          name,
-          phone,
-          email,
-          message,
-          status: "new"
-
-        }]);
-
-
-    button.disabled = false;
-
-    button.textContent =
-      "إرسال الرسالة";
-
-
-    if (error) {
-
-      console.error(error);
-
-      setResult(
-        contactResult,
-        "حدث خطأ أثناء الإرسال.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    setResult(
-      contactResult,
-      "✅ تم إرسال الرسالة بنجاح.",
-      "success"
-    );
-
-
-    contactForm.reset();
-
-  }
-);
-
-
-/* =========================================================
-   ORDER MODAL
-========================================================= */
-
-const orderModal =
-  document.getElementById(
-    "orderModal"
-  );
-
-
-document
-  .querySelectorAll(
-    ".order-open"
-  )
-  .forEach((button) => {
-
-    button.addEventListener(
-      "click",
-      (event) => {
-
-        event.preventDefault();
-
-        mobileMenu.classList.remove(
-          "open"
-        );
-
-        openModal(
-          orderModal
-        );
-
-      }
-    );
-
-  });
-
-
-document
-  .getElementById(
-    "closeOrderModal"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      closeModal(
-        orderModal
-      );
-
-    }
-  );
-
-
-const orderForm =
-  document.getElementById(
-    "orderForm"
-  );
-
-const orderResult =
-  document.getElementById(
-    "orderResult"
-  );
-
-
-orderForm.addEventListener(
-  "submit",
-  async (event) => {
-
-    event.preventDefault();
-
-
-    const submit =
-      document.getElementById(
-        "orderSubmit"
-      );
-
-
-    submit.disabled = true;
-
-    submit.textContent =
-      "جاري إرسال الطلب...";
-
-
-    const order = {
-
-      full_name:
-        document
-          .getElementById(
-            "orderName"
-          )
-          .value
-          .trim(),
-
-      phone:
-        document
-          .getElementById(
-            "orderPhone"
-          )
-          .value
-          .trim(),
-
-      email:
-        document
-          .getElementById(
-            "orderEmail"
-          )
-          .value
-          .trim(),
-
-      business_name:
-        document
-          .getElementById(
-            "orderBusiness"
-          )
-          .value
-          .trim(),
-
-      business_type:
-        document
-          .getElementById(
-            "orderBusinessType"
-          )
-          .value
-          .trim(),
-
-      website_type:
-        document
-          .getElementById(
-            "orderWebsiteType"
-          )
-          .value,
-
-      idea:
-        document
-          .getElementById(
-            "orderIdea"
-          )
-          .value
-          .trim(),
-
-      pages:
-        document
-          .getElementById(
-            "orderPages"
-          )
-          .value
-          .trim(),
-
-      features:
-        document
-          .getElementById(
-            "orderFeatures"
-          )
-          .value
-          .trim(),
-
-      budget:
-        document
-          .getElementById(
-            "orderBudget"
-          )
-          .value,
-
-      deadline:
-        document
-          .getElementById(
-            "orderDeadline"
-          )
-          .value
-          .trim(),
-
-      instagram:
-        document
-          .getElementById(
-            "orderInstagram"
-          )
-          .value
-          .trim(),
-
-      reference_url:
-        document
-          .getElementById(
-            "orderReference"
-          )
-          .value
-          .trim(),
-
-      notes:
-        document
-          .getElementById(
-            "orderNotes"
-          )
-          .value
-          .trim(),
-
-      status: "new"
-
-    };
-
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("orders")
-        .insert([order]);
-
-
-    submit.disabled = false;
-
-    submit.textContent =
-      "إرسال الطلب 🚀";
-
-
-    if (error) {
-
-      console.error(error);
-
-      setResult(
-        orderResult,
-        "حدث خطأ أثناء إرسال الطلب.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    setResult(
-      orderResult,
-      "✅ تم إرسال طلبك بنجاح!",
-      "success"
-    );
-
-
-    orderForm.reset();
-
-  }
-);
-
-
-/* =========================================================
-   ADMIN LOGIN
-========================================================= */
-
-const adminLoginModal =
-  document.getElementById(
-    "adminLoginModal"
-  );
-
-
-const openAdminBtn =
-  document.getElementById(
-    "openAdminBtn"
-  );
-
-
-const mobileAdminBtn =
-  document.getElementById(
-    "mobileAdminBtn"
-  );
-
-
-function openAdminLogin() {
-
-  mobileMenu.classList.remove(
-    "open"
-  );
-
-  openModal(
-    adminLoginModal
-  );
-
-}
-
-
-openAdminBtn.addEventListener(
-  "click",
-  openAdminLogin
-);
-
-
-mobileAdminBtn.addEventListener(
-  "click",
-  openAdminLogin
-);
-
-
-document
-  .getElementById(
-    "closeAdminLogin"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      closeModal(
-        adminLoginModal
-      );
-
-    }
-  );
-
-
-const adminLoginForm =
-  document.getElementById(
-    "adminLoginForm"
-  );
-
-
-const adminLoginResult =
-  document.getElementById(
-    "adminLoginResult"
-  );
-
-
-adminLoginForm.addEventListener(
-  "submit",
-  async (event) => {
-
-    event.preventDefault();
-
-
-    const button =
-      document.getElementById(
-        "adminLoginButton"
-      );
 
 
     const password =
       document
         .getElementById(
-          "adminPassword"
+          "loginPassword"
         )
         .value;
+
+
+    const button =
+      document.getElementById(
+        "loginButton"
+      );
 
 
     button.disabled = true;
@@ -1175,9 +319,7 @@ adminLoginForm.addEventListener(
       await supabaseClient.auth
         .signInWithPassword({
 
-          email:
-            "ardjoundjalil8@gmail.com",
-
+          email,
           password
 
         });
@@ -1193,169 +335,88 @@ adminLoginForm.addEventListener(
 
       console.error(error);
 
-      setResult(
-        adminLoginResult,
-        "كلمة المرور غير صحيحة.",
-        "error"
-      );
+      loginError.textContent =
+        "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
 
       return;
 
     }
 
 
-    const isAdmin =
-      await checkAdmin(
-        data.user.id
-      );
+    const admin =
+      await checkAdmin();
 
 
-    if (!isAdmin) {
+    if (!admin) {
 
       await supabaseClient.auth
         .signOut();
 
-
-      setResult(
-        adminLoginResult,
-        "هذا الحساب ليس Admin.",
-        "error"
-      );
+      loginError.textContent =
+        "الحساب غير مضاف كـAdmin.";
 
       return;
 
     }
 
 
-    closeModal(
-      adminLoginModal
-    );
+    show(adminApp);
+    hide(loginPage);
 
-
-    document
-      .getElementById(
-        "adminPassword"
-      )
-      .value = "";
-
-
-    openAdminPanel();
+    await loadEverything();
 
   }
 );
 
 
-/* =========================================================
-   CHECK ADMIN
-========================================================= */
-
-async function checkAdmin(
-  userId
-) {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("admins")
-      .select("user_id")
-      .eq(
-        "user_id",
-        userId
-      )
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      "Admin:",
-      error
-    );
-
-    return false;
-
-  }
-
-
-  return !!data;
-
-}
-
-
-/* =========================================================
-   ADMIN PANEL
-========================================================= */
-
-const adminPanel =
-  document.getElementById(
-    "adminPanel"
-  );
-
-
-function openAdminPanel() {
-
-  adminPanel.classList.remove(
-    "hidden"
-  );
-
-  document.body.classList.add(
-    "locked"
-  );
-
-  loadAdminEverything();
-
-}
-
-
 document
   .getElementById(
-    "closeAdminPanel"
+    "logoutButton"
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
-      adminPanel.classList.add(
-        "hidden"
-      );
+      await supabaseClient.auth
+        .signOut();
 
-      document.body.classList.remove(
-        "locked"
-      );
+      hide(adminApp);
+      show(loginPage);
 
     }
   );
 
 
-/* ADMIN TABS */
+/* =========================================
+   NAVIGATION
+========================================= */
+
+const pageTitle =
+  document.getElementById(
+    "pageTitle"
+  );
+
 
 document
-  .querySelectorAll(
-    ".admin-tab"
-  )
+  .querySelectorAll(".tab")
   .forEach((tab) => {
 
     tab.addEventListener(
       "click",
-      () => {
+      async () => {
 
         const target =
-          tab.dataset.adminSection;
+          tab.dataset.section;
 
 
         document
-          .querySelectorAll(
-            ".admin-tab"
-          )
-          .forEach((item) => {
-
-            item.classList.remove(
-              "active"
-            );
-
-          });
+          .querySelectorAll(".tab")
+          .forEach(
+            (item) =>
+              item.classList.remove(
+                "active"
+              )
+          );
 
 
         tab.classList.add(
@@ -1365,15 +426,14 @@ document
 
         document
           .querySelectorAll(
-            ".admin-section"
+            ".section"
           )
-          .forEach((section) => {
-
-            section.classList.remove(
-              "active"
-            );
-
-          });
+          .forEach(
+            (section) =>
+              section.classList.remove(
+                "active"
+              )
+          );
 
 
         document
@@ -1383,40 +443,32 @@ document
           );
 
 
-        if (
-          target ===
-          "adminSettings"
-        ) {
-          loadAdminSettings();
-        }
+        const titles = {
 
-        if (
-          target ===
-          "adminServices"
-        ) {
-          loadAdminServices();
-        }
+          dashboard:
+            "الرئيسية",
 
-        if (
-          target ===
-          "adminProjects"
-        ) {
-          loadAdminProjects();
-        }
+          settings:
+            "معلومات الموقع",
 
-        if (
-          target ===
-          "adminOrders"
-        ) {
-          loadAdminOrders();
-        }
+          services:
+            "الخدمات",
 
-        if (
-          target ===
-          "adminMessages"
-        ) {
-          loadAdminMessages();
-        }
+          projects:
+            "المشاريع",
+
+          orders:
+            "طلبات المواقع",
+
+          messages:
+            "الرسائل"
+
+        };
+
+
+        pageTitle.textContent =
+          titles[target] ||
+          "Admin";
 
       }
     );
@@ -1424,11 +476,14 @@ document
   });
 
 
-/* =========================================================
-   ADMIN SETTINGS
-========================================================= */
+/* =========================================
+   SETTINGS
+========================================= */
 
-async function loadAdminSettings() {
+let currentSettings = null;
+
+
+async function loadSettings() {
 
   const {
     data,
@@ -1455,111 +510,218 @@ async function loadAdminSettings() {
   }
 
 
+  currentSettings =
+    data;
+
+
   document.getElementById(
-    "setSiteName"
+    "siteName"
   ).value =
-    data.site_name || "";
-
+    data.site_name ||
+    "";
 
   document.getElementById(
-    "setOwnerName"
+    "ownerName"
   ).value =
-    data.owner_name || "";
-
+    data.owner_name ||
+    "";
 
   document.getElementById(
-    "setHeroTitle"
+    "heroTitle"
   ).value =
-    data.hero_title || "";
-
+    data.hero_title ||
+    "";
 
   document.getElementById(
-    "setHeroDescription"
+    "heroDescription"
   ).value =
-    data.hero_description || "";
-
+    data.hero_description ||
+    "";
 
   document.getElementById(
-    "setAboutTitle"
+    "aboutTitle"
   ).value =
-    data.about_title || "";
-
+    data.about_title ||
+    "";
 
   document.getElementById(
-    "setWhatsapp"
+    "siteWhatsapp"
   ).value =
-    data.whatsapp || "";
-
+    data.whatsapp ||
+    "";
 
   document.getElementById(
-    "setEmail"
+    "siteEmail"
   ).value =
-    data.email || "";
-
+    data.email ||
+    "";
 
   document.getElementById(
-    "setInstagram"
+    "siteInstagram"
   ).value =
-    data.instagram_url || "";
-
+    data.instagram_url ||
+    "";
 
   document.getElementById(
-    "setAboutText"
+    "aboutText"
   ).value =
-    data.about_text || "";
-
-
-  document.getElementById(
-    "setLogo"
-  ).value =
-    data.logo_url || "";
-
+    data.about_text ||
+    "";
 
   document.getElementById(
-    "setProfile"
-  ).value =
-    data.profile_image_url || "";
-
-
-  document.getElementById(
-    "setPrimary"
+    "primaryColor"
   ).value =
     data.primary_color ||
     "#7c3aed";
 
-
   document.getElementById(
-    "setSecondary"
+    "secondaryColor"
   ).value =
     data.secondary_color ||
     "#06b6d4";
 
 
   document.getElementById(
-    "setShowAbout"
+    "showAbout"
   ).checked =
     data.show_about !== false;
 
-
   document.getElementById(
-    "setShowServices"
+    "showServices"
   ).checked =
     data.show_services !== false;
 
-
   document.getElementById(
-    "setShowProjects"
+    "showProjects"
   ).checked =
     data.show_portfolio !== false;
 
-
   document.getElementById(
-    "setShowContact"
+    "showContact"
   ).checked =
     data.show_contact !== false;
 
+
+  setImagePreview(
+    document.getElementById(
+      "logoPreview"
+    ),
+    data.logo_url
+  );
+
+
+  setImagePreview(
+    document.getElementById(
+      "profilePreview"
+    ),
+    data.profile_image_url
+  );
+
 }
 
+
+function setImagePreview(
+  img,
+  url
+) {
+
+  if (url) {
+
+    img.src =
+      url;
+
+    img.style.display =
+      "block";
+
+  } else {
+
+    img.removeAttribute(
+      "src"
+    );
+
+    img.style.display =
+      "none";
+
+  }
+
+}
+
+
+/* FILE PREVIEWS */
+
+document
+  .getElementById(
+    "logoFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+      document.getElementById(
+        "logoFileName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "logoPreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "profileFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+      document.getElementById(
+        "profileFileName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "profilePreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
+
+
+/* SAVE SETTINGS */
 
 document
   .getElementById(
@@ -1572,14 +734,15 @@ document
       event.preventDefault();
 
 
-      const result =
+      const output =
         document.getElementById(
           "settingsResult"
         );
 
 
       const {
-        data: current
+        data: row,
+        error: rowError
       } =
         await supabaseClient
           .from("site_settings")
@@ -1588,10 +751,10 @@ document
           .maybeSingle();
 
 
-      if (!current) {
+      if (rowError || !row) {
 
-        setResult(
-          result,
+        notify(
+          output,
           "لم يتم العثور على إعدادات.",
           "error"
         );
@@ -1601,150 +764,247 @@ document
       }
 
 
-      const updates = {
+      try {
 
-        site_name:
-          document.getElementById(
-            "setSiteName"
-          ).value.trim(),
+        let logoUrl =
+          currentSettings?.logo_url ||
+          "";
 
-        owner_name:
-          document.getElementById(
-            "setOwnerName"
-          ).value.trim(),
-
-        hero_title:
-          document.getElementById(
-            "setHeroTitle"
-          ).value.trim(),
-
-        hero_description:
-          document.getElementById(
-            "setHeroDescription"
-          ).value.trim(),
-
-        about_title:
-          document.getElementById(
-            "setAboutTitle"
-          ).value.trim(),
-
-        whatsapp:
-          document.getElementById(
-            "setWhatsapp"
-          ).value.trim(),
-
-        email:
-          document.getElementById(
-            "setEmail"
-          ).value.trim(),
-
-        instagram_url:
-          document.getElementById(
-            "setInstagram"
-          ).value.trim(),
-
-        about_text:
-          document.getElementById(
-            "setAboutText"
-          ).value.trim(),
-
-        logo_url:
-          document.getElementById(
-            "setLogo"
-          ).value.trim(),
-
-        profile_image_url:
-          document.getElementById(
-            "setProfile"
-          ).value.trim(),
-
-        primary_color:
-          document.getElementById(
-            "setPrimary"
-          ).value.trim(),
-
-        secondary_color:
-          document.getElementById(
-            "setSecondary"
-          ).value.trim(),
-
-        show_about:
-          document.getElementById(
-            "setShowAbout"
-          ).checked,
-
-        show_services:
-          document.getElementById(
-            "setShowServices"
-          ).checked,
-
-        show_portfolio:
-          document.getElementById(
-            "setShowProjects"
-          ).checked,
-
-        show_contact:
-          document.getElementById(
-            "setShowContact"
-          ).checked,
-
-        updated_at:
-          new Date().toISOString()
-
-      };
+        let profileUrl =
+          currentSettings?.profile_image_url ||
+          "";
 
 
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("site_settings")
-          .update(updates)
-          .eq(
-            "id",
-            current.id
-          );
+        const logoFile =
+          document
+            .getElementById(
+              "logoFile"
+            )
+            .files[0];
 
 
-      if (error) {
+        if (logoFile) {
+
+          logoUrl =
+            await uploadImage(
+              logoFile,
+              "branding"
+            );
+
+        }
+
+
+        const profileFile =
+          document
+            .getElementById(
+              "profileFile"
+            )
+            .files[0];
+
+
+        if (profileFile) {
+
+          profileUrl =
+            await uploadImage(
+              profileFile,
+              "branding"
+            );
+
+        }
+
+
+        const update = {
+
+          site_name:
+            document
+              .getElementById(
+                "siteName"
+              )
+              .value
+              .trim(),
+
+          owner_name:
+            document
+              .getElementById(
+                "ownerName"
+              )
+              .value
+              .trim(),
+
+          hero_title:
+            document
+              .getElementById(
+                "heroTitle"
+              )
+              .value
+              .trim(),
+
+          hero_description:
+            document
+              .getElementById(
+                "heroDescription"
+              )
+              .value
+              .trim(),
+
+          about_title:
+            document
+              .getElementById(
+                "aboutTitle"
+              )
+              .value
+              .trim(),
+
+          about_text:
+            document
+              .getElementById(
+                "aboutText"
+              )
+              .value
+              .trim(),
+
+          whatsapp:
+            document
+              .getElementById(
+                "siteWhatsapp"
+              )
+              .value
+              .trim(),
+
+          email:
+            document
+              .getElementById(
+                "siteEmail"
+              )
+              .value
+              .trim(),
+
+          instagram_url:
+            document
+              .getElementById(
+                "siteInstagram"
+              )
+              .value
+              .trim(),
+
+          logo_url:
+            logoUrl,
+
+          profile_image_url:
+            profileUrl,
+
+          primary_color:
+            document
+              .getElementById(
+                "primaryColor"
+              )
+              .value
+              .trim(),
+
+          secondary_color:
+            document
+              .getElementById(
+                "secondaryColor"
+              )
+              .value
+              .trim(),
+
+          show_about:
+            document
+              .getElementById(
+                "showAbout"
+              )
+              .checked,
+
+          show_services:
+            document
+              .getElementById(
+                "showServices"
+              )
+              .checked,
+
+          show_portfolio:
+            document
+              .getElementById(
+                "showProjects"
+              )
+              .checked,
+
+          show_contact:
+            document
+              .getElementById(
+                "showContact"
+              )
+              .checked,
+
+          updated_at:
+            new Date().toISOString()
+
+        };
+
+
+        const {
+          error
+        } =
+          await supabaseClient
+            .from("site_settings")
+            .update(
+              update
+            )
+            .eq(
+              "id",
+              row.id
+            );
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        currentSettings = {
+          ...currentSettings,
+          ...update
+        };
+
+
+        notify(
+          output,
+          "✅ تم حفظ كل التغييرات.",
+          "success"
+        );
+
+      } catch (error) {
 
         console.error(error);
 
-        setResult(
-          result,
-          "حدث خطأ أثناء الحفظ.",
+        notify(
+          output,
+          error.message ||
+            "حدث خطأ أثناء الحفظ.",
           "error"
         );
 
-        return;
-
       }
-
-
-      setResult(
-        result,
-        "✅ تم حفظ كل التغييرات.",
-        "success"
-      );
-
-
-      await loadPublicSettings();
 
     }
   );
 
 
-/* =========================================================
-   ADMIN SERVICES
-========================================================= */
+/* =========================================
+   SERVICES
+========================================= */
 
-const adminServicesList =
+let serviceEditingId =
+  null;
+
+const servicesList =
   document.getElementById(
-    "adminServicesList"
+    "servicesList"
   );
 
 
-async function loadAdminServices() {
+async function loadServices() {
 
   const {
     data,
@@ -1771,10 +1031,10 @@ async function loadAdminServices() {
 
     console.error(error);
 
-    adminServicesList.innerHTML =
+    servicesList.innerHTML =
       `
         <div class="empty">
-          حدث خطأ.
+          حدث خطأ في تحميل الخدمات.
         </div>
       `;
 
@@ -1783,15 +1043,18 @@ async function loadAdminServices() {
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  document.getElementById(
+    "servicesCount"
+  ).textContent =
+    data.length;
 
-    adminServicesList.innerHTML =
+
+  if (!data.length) {
+
+    servicesList.innerHTML =
       `
         <div class="empty">
-          لا توجد خدمات.
+          لا توجد خدمات. اضغط «إضافة خدمة».
         </div>
       `;
 
@@ -1800,79 +1063,87 @@ async function loadAdminServices() {
   }
 
 
-  adminServicesList.innerHTML =
+  servicesList.innerHTML =
     data
-      .map((service) => {
+      .map(
+        (item) => {
 
-        const image =
-          service.image_url
-            ? `
-              <img
-                src="${escapeHTML(
-                  service.image_url
-                )}"
-                alt=""
-              >
-            `
-            : "";
+          return `
+            <article class="admin-item">
+
+              ${
+                item.image_url
+                  ? `
+                    <img
+                      class="admin-item-image"
+                      src="${escapeHTML(
+                        item.image_url
+                      )}"
+                      alt=""
+                    >
+                  `
+                  : `
+                    <div
+                      class="admin-item-image"
+                    ></div>
+                  `
+              }
 
 
-        return `
-          <article class="admin-item">
+              <div class="admin-item-body">
 
-            ${image}
+                <h3>
+                  ${escapeHTML(
+                    item.icon || "💻"
+                  )}
+                  ${escapeHTML(
+                    item.title
+                  )}
+                </h3>
 
-            <div class="admin-item-content">
 
-              <h4>
-                ${escapeHTML(
-                  service.icon ||
-                  "💻"
-                )}
-                ${escapeHTML(
-                  service.title
-                )}
-              </h4>
+                <p>
+                  ${escapeHTML(
+                    item.description ||
+                    ""
+                  )}
+                </p>
 
-              <p>
-                ${escapeHTML(
-                  service.description ||
-                  ""
-                )}
-              </p>
 
-              <div class="admin-item-price">
-                ${escapeHTML(
-                  service.price ||
-                  ""
-                )}
+                <div class="item-meta">
+                  ${escapeHTML(
+                    item.price ||
+                    ""
+                  )}
+                </div>
+
+
+                <div class="item-actions">
+
+                  <button
+                    class="edit-btn"
+                    onclick="openEditService('${item.id}')"
+                  >
+                    تعديل
+                  </button>
+
+
+                  <button
+                    class="delete-btn"
+                    onclick="removeService('${item.id}')"
+                  >
+                    حذف
+                  </button>
+
+                </div>
+
               </div>
 
+            </article>
+          `;
 
-              <div class="admin-item-actions">
-
-                <button
-                  class="admin-edit"
-                  onclick="editService('${service.id}')"
-                >
-                  تعديل
-                </button>
-
-                <button
-                  class="admin-delete"
-                  onclick="deleteService('${service.id}')"
-                >
-                  حذف
-                </button>
-
-              </div>
-
-            </div>
-
-          </article>
-        `;
-
-      })
+        }
+      )
       .join("");
 
 }
@@ -1880,11 +1151,15 @@ async function loadAdminServices() {
 
 document
   .getElementById(
-    "newServiceBtn"
+    "addService"
   )
   .addEventListener(
     "click",
     () => {
+
+      serviceEditingId =
+        null;
+
 
       document
         .getElementById(
@@ -1893,28 +1168,43 @@ document
         .reset();
 
 
-      document.getElementById(
-        "serviceId"
-      ).value = "";
-
-
-      document.getElementById(
-        "serviceModalTitle"
-      ).textContent =
+      document
+        .getElementById(
+          "serviceModalTitle"
+        )
+        .textContent =
         "إضافة خدمة";
 
 
-      openModal(
-        document.getElementById(
-          "serviceEditModal"
+      document
+        .getElementById(
+          "serviceImageName"
         )
+        .textContent =
+        "لم يتم اختيار صورة";
+
+
+      setImagePreview(
+        document.getElementById(
+          "serviceImagePreview"
+        ),
+        ""
       );
+
+
+      document
+        .getElementById(
+          "serviceModal"
+        )
+        .classList.remove(
+          "hidden"
+        );
 
     }
   );
 
 
-window.editService =
+window.openEditService =
   async function(id) {
 
     const {
@@ -1924,10 +1214,7 @@ window.editService =
       await supabaseClient
         .from("services")
         .select("*")
-        .eq(
-          "id",
-          id
-        )
+        .eq("id", id)
         .single();
 
 
@@ -1942,40 +1229,57 @@ window.editService =
     }
 
 
-    document.getElementById(
-      "serviceId"
-    ).value =
-      data.id;
+    serviceEditingId =
+      id;
 
 
     document.getElementById(
       "serviceTitle"
     ).value =
-      data.title || "";
-
+      data.title ||
+      "";
 
     document.getElementById(
       "serviceDescription"
     ).value =
-      data.description || "";
-
+      data.description ||
+      "";
 
     document.getElementById(
       "servicePrice"
     ).value =
-      data.price || "";
-
+      data.price ||
+      "";
 
     document.getElementById(
       "serviceIcon"
     ).value =
-      data.icon || "💻";
+      data.icon ||
+      "💻";
+
+
+    document
+      .getElementById(
+        "serviceImageFile"
+      )
+      .value =
+      "";
 
 
     document.getElementById(
-      "serviceImage"
-    ).value =
-      data.image_url || "";
+      "serviceImageName"
+    ).textContent =
+      data.image_url
+        ? "الصورة الحالية"
+        : "لم يتم اختيار صورة";
+
+
+    setImagePreview(
+      document.getElementById(
+        "serviceImagePreview"
+      ),
+      data.image_url
+    );
 
 
     document.getElementById(
@@ -1984,13 +1288,52 @@ window.editService =
       "تعديل الخدمة";
 
 
-    openModal(
-      document.getElementById(
-        "serviceEditModal"
+    document
+      .getElementById(
+        "serviceModal"
       )
-    );
+      .classList.remove(
+        "hidden"
+      );
 
   };
+
+
+document
+  .getElementById(
+    "serviceImageFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+
+      document.getElementById(
+        "serviceImageName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "serviceImagePreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
 
 
 document
@@ -2004,105 +1347,182 @@ document
       event.preventDefault();
 
 
-      const id =
-        document.getElementById(
-          "serviceId"
-        ).value;
+      const button =
+        event.target.querySelector(
+          "button[type='submit']"
+        );
 
 
-      const serviceData = {
-
-        title:
-          document.getElementById(
-            "serviceTitle"
-          ).value.trim(),
-
-        description:
-          document.getElementById(
-            "serviceDescription"
-          ).value.trim(),
-
-        price:
-          document.getElementById(
-            "servicePrice"
-          ).value.trim(),
-
-        icon:
-          document.getElementById(
-            "serviceIcon"
-          ).value.trim() ||
-          "💻",
-
-        image_url:
-          document.getElementById(
-            "serviceImage"
-          ).value.trim()
-
-      };
+      button.disabled = true;
+      button.textContent =
+        "جاري الحفظ...";
 
 
-      let error;
+      try {
+
+        let imageUrl = "";
 
 
-      if (id) {
+        if (
+          serviceEditingId
+        ) {
 
-        const result =
-          await supabaseClient
-            .from("services")
-            .update(
-              serviceData
+          const {
+            data: old
+          } =
+            await supabaseClient
+              .from("services")
+              .select("image_url")
+              .eq(
+                "id",
+                serviceEditingId
+              )
+              .single();
+
+
+          imageUrl =
+            old?.image_url ||
+            "";
+
+        }
+
+
+        const file =
+          document
+            .getElementById(
+              "serviceImageFile"
             )
-            .eq(
-              "id",
-              id
+            .files[0];
+
+
+        if (file) {
+
+          imageUrl =
+            await uploadImage(
+              file,
+              "services"
             );
 
-        error =
-          result.error;
-
-      } else {
-
-        const result =
-          await supabaseClient
-            .from("services")
-            .insert([
-              serviceData
-            ]);
-
-        error =
-          result.error;
-
-      }
+        }
 
 
-      if (error) {
+        const payload = {
+
+          title:
+            document
+              .getElementById(
+                "serviceTitle"
+              )
+              .value
+              .trim(),
+
+          description:
+            document
+              .getElementById(
+                "serviceDescription"
+              )
+              .value
+              .trim(),
+
+          price:
+            document
+              .getElementById(
+                "servicePrice"
+              )
+              .value
+              .trim(),
+
+          icon:
+            document
+              .getElementById(
+                "serviceIcon"
+              )
+              .value
+              .trim() ||
+            "💻",
+
+          image_url:
+            imageUrl
+
+        };
+
+
+        if (
+          serviceEditingId
+        ) {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("services")
+              .update(
+                payload
+              )
+              .eq(
+                "id",
+                serviceEditingId
+              );
+
+
+          if (error) {
+            throw error;
+          }
+
+        } else {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("services")
+              .insert([
+                payload
+              ]);
+
+
+          if (error) {
+            throw error;
+          }
+
+        }
+
+
+        document
+          .getElementById(
+            "serviceModal"
+          )
+          .classList.add(
+            "hidden"
+          );
+
+
+        await loadServices();
+
+        button.disabled = false;
+        button.textContent =
+          "حفظ الخدمة";
+
+      } catch (error) {
 
         console.error(error);
 
         alert(
+          error.message ||
           "حدث خطأ أثناء حفظ الخدمة."
         );
 
-        return;
+        button.disabled = false;
+        button.textContent =
+          "حفظ الخدمة";
 
       }
-
-
-      closeModal(
-        document.getElementById(
-          "serviceEditModal"
-        )
-      );
-
-
-      await loadAdminServices();
-      await loadPublicServices();
 
     }
   );
 
 
-window.deleteService =
+window.removeService =
   async function(id) {
 
     if (
@@ -2128,6 +1548,8 @@ window.deleteService =
 
     if (error) {
 
+      console.error(error);
+
       alert(
         "تعذر حذف الخدمة."
       );
@@ -2137,23 +1559,22 @@ window.deleteService =
     }
 
 
-    await loadAdminServices();
-    await loadPublicServices();
+    await loadServices();
 
   };
 
 
 document
   .getElementById(
-    "closeServiceModal"
+    "closeService"
   )
   .addEventListener(
     "click",
     () => {
 
-      closeModal(
+      hide(
         document.getElementById(
-          "serviceEditModal"
+          "serviceModal"
         )
       );
 
@@ -2161,17 +1582,21 @@ document
   );
 
 
-/* =========================================================
-   ADMIN PROJECTS
-========================================================= */
+/* =========================================
+   PROJECTS
+========================================= */
 
-const adminProjectsList =
+let projectEditingId =
+  null;
+
+
+const projectsList =
   document.getElementById(
-    "adminProjectsList"
+    "projectsList"
   );
 
 
-async function loadAdminProjects() {
+async function loadProjects() {
 
   const {
     data,
@@ -2198,10 +1623,10 @@ async function loadAdminProjects() {
 
     console.error(error);
 
-    adminProjectsList.innerHTML =
+    projectsList.innerHTML =
       `
         <div class="empty">
-          حدث خطأ.
+          حدث خطأ في تحميل المشاريع.
         </div>
       `;
 
@@ -2210,15 +1635,18 @@ async function loadAdminProjects() {
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  document.getElementById(
+    "projectsCount"
+  ).textContent =
+    data.length;
 
-    adminProjectsList.innerHTML =
+
+  if (!data.length) {
+
+    projectsList.innerHTML =
       `
         <div class="empty">
-          لا توجد مشاريع.
+          لا توجد مشاريع. اضغط «إضافة مشروع».
         </div>
       `;
 
@@ -2227,75 +1655,84 @@ async function loadAdminProjects() {
   }
 
 
-  adminProjectsList.innerHTML =
+  projectsList.innerHTML =
     data
-      .map((project) => {
+      .map(
+        (item) => {
 
-        const image =
-          project.image_url
-            ? `
-              <img
-                src="${escapeHTML(
-                  project.image_url
-                )}"
-                alt=""
-              >
-            `
-            : "";
+          return `
+            <article class="admin-item">
+
+              ${
+                item.image_url
+                  ? `
+                    <img
+                      class="admin-item-image"
+                      src="${escapeHTML(
+                        item.image_url
+                      )}"
+                      alt=""
+                    >
+                  `
+                  : `
+                    <div
+                      class="admin-item-image"
+                    ></div>
+                  `
+              }
 
 
-        return `
-          <article class="admin-item">
+              <div class="admin-item-body">
 
-            ${image}
+                <h3>
+                  ${escapeHTML(
+                    item.title
+                  )}
+                </h3>
 
-            <div class="admin-item-content">
 
-              <h4>
-                ${escapeHTML(
-                  project.title
-                )}
-              </h4>
+                <p>
+                  ${escapeHTML(
+                    item.description ||
+                    ""
+                  )}
+                </p>
 
-              <p>
-                ${escapeHTML(
-                  project.description ||
-                  ""
-                )}
-              </p>
 
-              <div class="admin-item-price">
-                ${escapeHTML(
-                  project.category ||
-                  ""
-                )}
+                <div class="item-meta">
+                  ${escapeHTML(
+                    item.category ||
+                    ""
+                  )}
+                </div>
+
+
+                <div class="item-actions">
+
+                  <button
+                    class="edit-btn"
+                    onclick="openEditProject('${item.id}')"
+                  >
+                    تعديل
+                  </button>
+
+
+                  <button
+                    class="delete-btn"
+                    onclick="removeProject('${item.id}')"
+                  >
+                    حذف
+                  </button>
+
+                </div>
+
               </div>
 
+            </article>
+          `;
 
-              <div class="admin-item-actions">
-
-                <button
-                  class="admin-edit"
-                  onclick="editProject('${project.id}')"
-                >
-                  تعديل
-                </button>
-
-                <button
-                  class="admin-delete"
-                  onclick="deleteProject('${project.id}')"
-                >
-                  حذف
-                </button>
-
-              </div>
-
-            </div>
-
-          </article>
-        `;
-
-      })
+        }
+      )
       .join("");
 
 }
@@ -2303,11 +1740,15 @@ async function loadAdminProjects() {
 
 document
   .getElementById(
-    "newProjectBtn"
+    "addProject"
   )
   .addEventListener(
     "click",
     () => {
+
+      projectEditingId =
+        null;
+
 
       document
         .getElementById(
@@ -2317,19 +1758,28 @@ document
 
 
       document.getElementById(
-        "projectId"
-      ).value = "";
-
-
-      document.getElementById(
         "projectModalTitle"
       ).textContent =
         "إضافة مشروع";
 
 
-      openModal(
+      document.getElementById(
+        "projectImageName"
+      ).textContent =
+        "لم يتم اختيار صورة";
+
+
+      setImagePreview(
         document.getElementById(
-          "projectEditModal"
+          "projectImagePreview"
+        ),
+        ""
+      );
+
+
+      show(
+        document.getElementById(
+          "projectModal"
         )
       );
 
@@ -2337,7 +1787,7 @@ document
   );
 
 
-window.editProject =
+window.openEditProject =
   async function(id) {
 
     const {
@@ -2365,40 +1815,55 @@ window.editProject =
     }
 
 
-    document.getElementById(
-      "projectId"
-    ).value =
-      data.id;
+    projectEditingId =
+      id;
 
 
     document.getElementById(
       "projectTitle"
     ).value =
-      data.title || "";
-
+      data.title ||
+      "";
 
     document.getElementById(
       "projectDescription"
     ).value =
-      data.description || "";
-
+      data.description ||
+      "";
 
     document.getElementById(
       "projectCategory"
     ).value =
-      data.category || "";
-
-
-    document.getElementById(
-      "projectImage"
-    ).value =
-      data.image_url || "";
-
+      data.category ||
+      "";
 
     document.getElementById(
       "projectUrl"
     ).value =
-      data.project_url || "";
+      data.project_url ||
+      "";
+
+
+    document.getElementById(
+      "projectImageFile"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "projectImageName"
+    ).textContent =
+      data.image_url
+        ? "الصورة الحالية"
+        : "لم يتم اختيار صورة";
+
+
+    setImagePreview(
+      document.getElementById(
+        "projectImagePreview"
+      ),
+      data.image_url
+    );
 
 
     document.getElementById(
@@ -2407,13 +1872,50 @@ window.editProject =
       "تعديل المشروع";
 
 
-    openModal(
+    show(
       document.getElementById(
-        "projectEditModal"
+        "projectModal"
       )
     );
 
   };
+
+
+document
+  .getElementById(
+    "projectImageFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+
+      document.getElementById(
+        "projectImageName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "projectImagePreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
 
 
 document
@@ -2427,102 +1929,182 @@ document
       event.preventDefault();
 
 
-      const id =
-        document.getElementById(
-          "projectId"
-        ).value;
+      const button =
+        event.target.querySelector(
+          "button[type='submit']"
+        );
 
 
-      const projectData = {
+      button.disabled = true;
 
-        title:
-          document.getElementById(
-            "projectTitle"
-          ).value.trim(),
-
-        description:
-          document.getElementById(
-            "projectDescription"
-          ).value.trim(),
-
-        category:
-          document.getElementById(
-            "projectCategory"
-          ).value.trim(),
-
-        image_url:
-          document.getElementById(
-            "projectImage"
-          ).value.trim(),
-
-        project_url:
-          document.getElementById(
-            "projectUrl"
-          ).value.trim()
-
-      };
+      button.textContent =
+        "جاري الحفظ...";
 
 
-      let error;
+      try {
+
+        let imageUrl = "";
 
 
-      if (id) {
+        if (
+          projectEditingId
+        ) {
 
-        const result =
-          await supabaseClient
-            .from("projects")
-            .update(
-              projectData
+          const {
+            data: old
+          } =
+            await supabaseClient
+              .from("projects")
+              .select("image_url")
+              .eq(
+                "id",
+                projectEditingId
+              )
+              .single();
+
+
+          imageUrl =
+            old?.image_url ||
+            "";
+
+        }
+
+
+        const file =
+          document
+            .getElementById(
+              "projectImageFile"
             )
-            .eq(
-              "id",
-              id
+            .files[0];
+
+
+        if (file) {
+
+          imageUrl =
+            await uploadImage(
+              file,
+              "projects"
             );
 
-        error =
-          result.error;
-
-      } else {
-
-        const result =
-          await supabaseClient
-            .from("projects")
-            .insert([
-              projectData
-            ]);
-
-        error =
-          result.error;
-
-      }
+        }
 
 
-      if (error) {
+        const payload = {
+
+          title:
+            document
+              .getElementById(
+                "projectTitle"
+              )
+              .value
+              .trim(),
+
+          description:
+            document
+              .getElementById(
+                "projectDescription"
+              )
+              .value
+              .trim(),
+
+          category:
+            document
+              .getElementById(
+                "projectCategory"
+              )
+              .value
+              .trim(),
+
+          image_url:
+            imageUrl,
+
+          project_url:
+            document
+              .getElementById(
+                "projectUrl"
+              )
+              .value
+              .trim()
+
+        };
+
+
+        if (
+          projectEditingId
+        ) {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("projects")
+              .update(
+                payload
+              )
+              .eq(
+                "id",
+                projectEditingId
+              );
+
+
+          if (error) {
+            throw error;
+          }
+
+        } else {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("projects")
+              .insert([
+                payload
+              ]);
+
+
+          if (error) {
+            throw error;
+          }
+
+        }
+
+
+        hide(
+          document.getElementById(
+            "projectModal"
+          )
+        );
+
+
+        await loadProjects();
+
+        button.disabled = false;
+
+        button.textContent =
+          "حفظ المشروع";
+
+      } catch (error) {
+
+        console.error(error);
 
         alert(
+          error.message ||
           "حدث خطأ أثناء حفظ المشروع."
         );
 
-        return;
+        button.disabled = false;
+
+        button.textContent =
+          "حفظ المشروع";
 
       }
-
-
-      closeModal(
-        document.getElementById(
-          "projectEditModal"
-        )
-      );
-
-
-      await loadAdminProjects();
-      await loadPublicProjects();
 
     }
   );
 
 
-window.deleteProject =
+window.removeProject =
   async function(id) {
 
     if (
@@ -2548,6 +2130,8 @@ window.deleteProject =
 
     if (error) {
 
+      console.error(error);
+
       alert(
         "تعذر حذف المشروع."
       );
@@ -2557,23 +2141,22 @@ window.deleteProject =
     }
 
 
-    await loadAdminProjects();
-    await loadPublicProjects();
+    await loadProjects();
 
   };
 
 
 document
   .getElementById(
-    "closeProjectModal"
+    "closeProject"
   )
   .addEventListener(
     "click",
     () => {
 
-      closeModal(
+      hide(
         document.getElementById(
-          "projectEditModal"
+          "projectModal"
         )
       );
 
@@ -2581,17 +2164,17 @@ document
   );
 
 
-/* =========================================================
-   ADMIN ORDERS
-========================================================= */
+/* =========================================
+   ORDERS
+========================================= */
 
-const adminOrdersList =
-  document.getElementById(
-    "adminOrdersList"
-  );
+async function loadOrders() {
 
+  const list =
+    document.getElementById(
+      "ordersList"
+    );
 
-async function loadAdminOrders() {
 
   const {
     data,
@@ -2612,10 +2195,10 @@ async function loadAdminOrders() {
 
     console.error(error);
 
-    adminOrdersList.innerHTML =
+    list.innerHTML =
       `
         <div class="empty">
-          حدث خطأ أثناء تحميل الطلبات.
+          حدث خطأ في تحميل الطلبات.
         </div>
       `;
 
@@ -2624,12 +2207,21 @@ async function loadAdminOrders() {
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  document.getElementById(
+    "ordersCount"
+  ).textContent =
+    data.length;
 
-    adminOrdersList.innerHTML =
+
+  document.getElementById(
+    "ordersBadge"
+  ).textContent =
+    data.length;
+
+
+  if (!data.length) {
+
+    list.innerHTML =
       `
         <div class="empty">
           لا توجد طلبات مواقع حاليًا.
@@ -2641,271 +2233,301 @@ async function loadAdminOrders() {
   }
 
 
-  adminOrdersList.innerHTML =
+  list.innerHTML =
     data
-      .map((order) => {
+      .map(
+        (order) => {
 
-        const date =
-          order.created_at
-            ? new Date(
-                order.created_at
-              ).toLocaleString(
-                "fr-DZ"
-              )
-            : "";
+          const status =
+            order.status ||
+            "new";
 
 
-        return `
-          <article class="order-admin-card">
+          const statusOptions = [
 
-            <div class="order-admin-top">
+            ["new", "جديدة"],
 
-              <div>
+            ["contacted", "تم التواصل"],
 
-                <div class="order-admin-name">
-                  ${escapeHTML(
-                    order.full_name
-                  )}
-                </div>
+            ["working", "قيد العمل"],
 
-                <div
-                  class="order-admin-date"
-                >
-                  ${escapeHTML(
-                    date
-                  )}
-                </div>
+            ["done", "مكتملة"],
 
-              </div>
+            ["cancelled", "ملغاة"]
 
-            </div>
+          ];
 
 
-            <div class="order-data">
+          return `
+            <article class="order-card">
 
-              <div>
-                <span>📱 الهاتف</span>
-                <strong>
-                  ${escapeHTML(
-                    order.phone
-                  )}
-                </strong>
-              </div>
+              <div class="order-top">
 
-              <div>
-                <span>✉️ Email</span>
-                <strong>
-                  ${escapeHTML(
-                    order.email ||
-                    "-"
-                  )}
-                </strong>
-              </div>
+                <div>
 
-              <div>
-                <span>🏪 المشروع</span>
-                <strong>
-                  ${escapeHTML(
-                    order.business_name ||
-                    "-"
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>📌 النشاط</span>
-                <strong>
-                  ${escapeHTML(
-                    order.business_type ||
-                    "-"
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>🌐 نوع الموقع</span>
-                <strong>
-                  ${escapeHTML(
-                    order.website_type ||
-                    "-"
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>💰 الميزانية</span>
-                <strong>
-                  ${escapeHTML(
-                    order.budget ||
-                    "-"
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>📅 المدة</span>
-                <strong>
-                  ${escapeHTML(
-                    order.deadline ||
-                    "-"
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>📸 Instagram</span>
-                <strong>
-                  ${escapeHTML(
-                    order.instagram ||
-                    "-"
-                  )}
-                </strong>
-              </div>
-
-            </div>
-
-
-            <div class="order-block">
-
-              <div class="order-block-title">
-                💡 فكرة الموقع
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.idea ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            <div class="order-block">
-
-              <div class="order-block-title">
-                📄 الصفحات
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.pages ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            <div class="order-block">
-
-              <div class="order-block-title">
-                ⚡ المزايا
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.features ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            <div class="order-block">
-
-              <div class="order-block-title">
-                📝 الملاحظات
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.notes ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            ${
-              order.reference_url
-                ? `
-                  <div class="order-block">
-
-                    <div class="order-block-title">
-                      🔗 الموقع المرجعي
-                    </div>
-
-                    <a
-                      class="project-link"
-                      href="${escapeHTML(
-                        order.reference_url
-                      )}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      فتح الرابط
-                    </a>
-
+                  <div class="order-name">
+                    ${escapeHTML(
+                      order.full_name
+                    )}
                   </div>
-                `
-                : ""
-            }
+
+                  <div>
+                    📞 ${escapeHTML(
+                      order.phone
+                    )}
+                  </div>
+
+                </div>
 
 
-            <div class="order-actions">
+                <div class="order-date">
+                  ${escapeHTML(
+                    formatDate(
+                      order.created_at
+                    )
+                  )}
+                </div>
 
-              <button
-                class="order-status"
-                onclick="toggleOrderStatus(
-                  '${order.id}',
-                  '${escapeHTML(
-                    order.status ||
-                    "new"
-                  )}'
-                )"
-              >
+              </div>
+
+
+              <div class="order-grid">
+
+                <div>
+                  <span>🏪 المشروع</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.business_name ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>📌 النشاط</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.business_type ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>🌐 نوع الموقع</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.website_type ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>💰 الميزانية</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.budget ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>📅 المدة</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.deadline ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>📸 Instagram</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.instagram ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>✉️ Email</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.email ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+              </div>
+
+
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  💡 فكرة الموقع
+                </div>
+
+                <p>
+                  ${escapeHTML(
+                    order.idea ||
+                    "-"
+                  )}
+                </p>
+
+              </div>
+
+
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  📄 الصفحات المطلوبة
+                </div>
+
+                <p>
+                  ${escapeHTML(
+                    order.pages ||
+                    "-"
+                  )}
+                </p>
+
+              </div>
+
+
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  ⚡ المزايا
+                </div>
+
+                <p>
+                  ${escapeHTML(
+                    order.features ||
+                    "-"
+                  )}
+                </p>
+
+              </div>
+
+
+              ${
+                order.notes
+                  ? `
+                    <div class="order-block">
+
+                      <div class="order-block-title">
+                        📝 ملاحظات
+                      </div>
+
+                      <p>
+                        ${escapeHTML(
+                          order.notes
+                        )}
+                      </p>
+
+                    </div>
+                  `
+                  : ""
+              }
+
+
+              <div class="order-controls">
+
+                <select
+                  class="status-select"
+                  onchange="changeOrderStatus(
+                    '${order.id}',
+                    this.value
+                  )"
+                >
+
+                  ${
+                    statusOptions
+                      .map(
+                        ([value,label]) =>
+                          `
+                            <option
+                              value="${value}"
+                              ${
+                                value === status
+                                  ? "selected"
+                                  : ""
+                              }
+                            >
+                              ${label}
+                            </option>
+                          `
+                      )
+                      .join("")
+                  }
+
+                </select>
+
+
+                <a
+                  href="${toWhatsApp(
+                    order.phone
+                  )}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="whatsapp-order"
+                >
+                  💬 WhatsApp
+                </a>
+
+
                 ${
-                  order.status === "done"
-                    ? "↩️ إرجاع للجديدة"
-                    : "✅ تمت المعالجة"
+                  order.reference_url
+                    ? `
+                      <a
+                        href="${escapeHTML(
+                          order.reference_url
+                        )}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="whatsapp-order"
+                      >
+                        🔗 المرجع
+                      </a>
+                    `
+                    : ""
                 }
-              </button>
 
 
-              <button
-                class="order-delete"
-                onclick="deleteOrder(
-                  '${order.id}'
-                )"
-              >
-                حذف الطلب
-              </button>
+                <button
+                  class="danger-btn"
+                  onclick="deleteOrder('${order.id}')"
+                >
+                  حذف
+                </button>
 
-            </div>
+              </div>
 
-          </article>
-        `;
+            </article>
+          `;
 
-      })
+        }
+      )
       .join("");
 
 }
 
 
-window.toggleOrderStatus =
+window.changeOrderStatus =
   async function(
     id,
-    currentStatus
+    status
   ) {
-
-    const newStatus =
-      currentStatus === "done"
-        ? "new"
-        : "done";
-
 
     const {
       error
@@ -2913,7 +2535,7 @@ window.toggleOrderStatus =
       await supabaseClient
         .from("orders")
         .update({
-          status: newStatus
+          status
         })
         .eq(
           "id",
@@ -2924,15 +2546,12 @@ window.toggleOrderStatus =
     if (error) {
 
       alert(
-        "تعذر تغيير الحالة."
+        "تعذر تغيير حالة الطلب."
       );
 
       return;
 
     }
-
-
-    await loadAdminOrders();
 
   };
 
@@ -2972,22 +2591,22 @@ window.deleteOrder =
     }
 
 
-    await loadAdminOrders();
+    await loadOrders();
 
   };
 
 
-/* =========================================================
-   ADMIN MESSAGES
-========================================================= */
+/* =========================================
+   MESSAGES
+========================================= */
 
-const adminMessagesList =
-  document.getElementById(
-    "adminMessagesList"
-  );
+async function loadMessages() {
 
+  const list =
+    document.getElementById(
+      "messagesList"
+    );
 
-async function loadAdminMessages() {
 
   const {
     data,
@@ -3008,10 +2627,10 @@ async function loadAdminMessages() {
 
     console.error(error);
 
-    adminMessagesList.innerHTML =
+    list.innerHTML =
       `
         <div class="empty">
-          حدث خطأ أثناء تحميل الرسائل.
+          حدث خطأ في تحميل الرسائل.
         </div>
       `;
 
@@ -3020,12 +2639,21 @@ async function loadAdminMessages() {
   }
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
+  document.getElementById(
+    "messagesCount"
+  ).textContent =
+    data.length;
 
-    adminMessagesList.innerHTML =
+
+  document.getElementById(
+    "messagesBadge"
+  ).textContent =
+    data.length;
+
+
+  if (!data.length) {
+
+    list.innerHTML =
       `
         <div class="empty">
           لا توجد رسائل حاليًا.
@@ -3037,131 +2665,117 @@ async function loadAdminMessages() {
   }
 
 
-  adminMessagesList.innerHTML =
+  list.innerHTML =
     data
-      .map((message) => {
+      .map(
+        (message) => {
 
-        const date =
-          message.created_at
-            ? new Date(
-                message.created_at
-              ).toLocaleString(
-                "fr-DZ"
-              )
-            : "";
+          return `
+            <article class="order-card">
 
-
-        return `
-          <article class="order-admin-card">
-
-            <div class="order-admin-top">
-
-              <div>
-
-                <div class="order-admin-name">
-                  ${escapeHTML(
-                    message.name
-                  )}
-                </div>
+              <div class="order-top">
 
                 <div>
-                  📱 ${escapeHTML(
-                    message.phone ||
-                    "-"
+
+                  <div class="order-name">
+                    ${escapeHTML(
+                      message.name
+                    )}
+                  </div>
+
+                  <div>
+                    📞 ${escapeHTML(
+                      message.phone ||
+                      "-"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div class="order-date">
+                  ${escapeHTML(
+                    formatDate(
+                      message.created_at
+                    )
                   )}
                 </div>
 
               </div>
 
 
-              <div class="order-admin-date">
-                ${escapeHTML(
-                  date
-                )}
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  ✉️ Email
+                </div>
+
+                <p>
+                  ${escapeHTML(
+                    message.email ||
+                    "-"
+                  )}
+                </p>
+
               </div>
 
-            </div>
 
+              <div class="order-block">
 
-            <div class="order-block">
+                <div class="order-block-title">
+                  💬 الرسالة
+                </div>
 
-              <div class="order-block-title">
-                ✉️ Email
+                <p>
+                  ${escapeHTML(
+                    message.message ||
+                    "-"
+                  )}
+                </p>
+
               </div>
 
-              <p>
-                ${escapeHTML(
-                  message.email ||
-                  "-"
-                )}
-              </p>
 
-            </div>
+              <div class="order-controls">
+
+                <button
+                  class="status-select"
+                  onclick="toggleMessage('${message.id}','${escapeHTML(message.status || "new")}')"
+                >
+                  ${
+                    message.status === "read"
+                      ? "↩️ غير مقروءة"
+                      : "✅ تمت القراءة"
+                  }
+                </button>
 
 
-            <div class="order-block">
+                <button
+                  class="danger-btn"
+                  onclick="deleteMessage('${message.id}')"
+                >
+                  حذف
+                </button>
 
-              <div class="order-block-title">
-                💬 الرسالة
               </div>
 
-              <p>
-                ${escapeHTML(
-                  message.message ||
-                  "-"
-                )}
-              </p>
+            </article>
+          `;
 
-            </div>
-
-
-            <div class="order-actions">
-
-              <button
-                class="order-status"
-                onclick="toggleMessageStatus(
-                  '${message.id}',
-                  '${escapeHTML(
-                    message.status ||
-                    "new"
-                  )}'
-                )"
-              >
-                ${
-                  message.status === "read"
-                    ? "↩️ غير مقروءة"
-                    : "✅ تمت القراءة"
-                }
-              </button>
-
-
-              <button
-                class="order-delete"
-                onclick="deleteMessage(
-                  '${message.id}'
-                )"
-              >
-                حذف
-              </button>
-
-            </div>
-
-          </article>
-        `;
-
-      })
+        }
+      )
       .join("");
 
 }
 
 
-window.toggleMessageStatus =
+window.toggleMessage =
   async function(
     id,
     currentStatus
   ) {
 
-    const newStatus =
+    const status =
       currentStatus === "read"
         ? "new"
         : "read";
@@ -3173,7 +2787,7 @@ window.toggleMessageStatus =
       await supabaseClient
         .from("messages")
         .update({
-          status: newStatus
+          status
         })
         .eq(
           "id",
@@ -3184,7 +2798,7 @@ window.toggleMessageStatus =
     if (error) {
 
       alert(
-        "تعذر تغيير الحالة."
+        "تعذر تغيير حالة الرسالة."
       );
 
       return;
@@ -3192,7 +2806,7 @@ window.toggleMessageStatus =
     }
 
 
-    await loadAdminMessages();
+    await loadMessages();
 
   };
 
@@ -3232,83 +2846,36 @@ window.deleteMessage =
     }
 
 
-    await loadAdminMessages();
+    await loadMessages();
 
   };
 
 
-/* =========================================================
-   ADMIN EVERYTHING
-========================================================= */
+/* =========================================
+   LOAD ALL
+========================================= */
 
-async function loadAdminEverything() {
+async function loadEverything() {
 
   await Promise.all([
 
-    loadAdminSettings(),
+    loadSettings(),
 
-    loadAdminServices(),
+    loadServices(),
 
-    loadAdminProjects(),
+    loadProjects(),
 
-    loadAdminOrders(),
+    loadOrders(),
 
-    loadAdminMessages()
+    loadMessages()
 
   ]);
 
 }
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
+/* =========================================
+   START
+========================================= */
 
-document
-  .getElementById(
-    "adminLogout"
-  )
-  .addEventListener(
-    "click",
-    async () => {
-
-      await supabaseClient.auth
-        .signOut();
-
-
-      adminPanel.classList.add(
-        "hidden"
-      );
-
-      document.body.classList.remove(
-        "locked"
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   INIT
-========================================================= */
-
-year.textContent =
-  new Date().getFullYear();
-
-
-async function init() {
-
-  await Promise.all([
-
-    loadPublicSettings(),
-
-    loadPublicServices(),
-
-    loadPublicProjects()
-
-  ]);
-
-}
-
-
-init();
+checkSession();
