@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -9,604 +11,910 @@
   <link rel="stylesheet" href="admin.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
 
-  <!-- LOGIN -->
-  <div id="loginPage" class="login-page">
+<!-- LOGIN -->
 
-    <div class="login-box">
+<div id="loginPage" class="login-page">
 
-      <div class="logo">
-        SITE WEB
-      </div>
+  <div class="login-card">
 
-      <h1>Admin Panel</h1>
+    <div class="login-mark">
+      🔐
+    </div>
 
-      <p>
-        تسجيل الدخول إلى لوحة الإدارة
-      </p>
+    <div class="brand-mini">
+      SITE WEB
+    </div>
 
-      <form id="loginForm">
+    <h1>
+      Admin Panel
+    </h1>
+
+    <p>
+      سجل الدخول لإدارة موقعك.
+    </p>
+
+
+    <form id="loginForm">
+
+      <div class="field">
+
+        <label>
+          Email
+        </label>
 
         <input
-          id="email"
+          id="loginEmail"
           type="email"
-          placeholder="Email"
           value="ardjoundjalil8@gmail.com"
           required
         >
 
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          كلمة المرور
+        </label>
+
         <input
-          id="password"
+          id="loginPassword"
           type="password"
-          placeholder="Password"
+          placeholder="••••••"
           required
         >
 
-        <button type="submit">
-          دخول
-        </button>
+      </div>
 
-      </form>
 
-      <div id="loginError"></div>
+      <button
+        id="loginButton"
+        class="main-btn full"
+        type="submit"
+      >
+        دخول الإدارة
+      </button>
 
-    </div>
+
+      <div
+        id="loginError"
+        class="error-text"
+      ></div>
+
+    </form>
+
+
+    <a href="index.html" class="back-site">
+      ← العودة للموقع
+    </a>
 
   </div>
 
+</div>
 
-  <!-- ADMIN -->
-  <div id="adminPage" class="admin-page hidden">
 
-    <aside class="sidebar">
+<!-- ADMIN -->
 
-      <div class="brand">
-        SITE WEB
-      </div>
+<div id="adminApp" class="admin-app hidden">
 
-      <button
-        class="nav-btn active"
-        data-section="dashboard"
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+      SITE WEB
+      <span>ADMIN</span>
+    </div>
+
+
+    <button
+      class="tab active"
+      data-section="dashboard"
+    >
+      <span>⌂</span>
+      الرئيسية
+    </button>
+
+
+    <button
+      class="tab"
+      data-section="settings"
+    >
+      <span>⚙</span>
+      معلومات الموقع
+    </button>
+
+
+    <button
+      class="tab"
+      data-section="services"
+    >
+      <span>▣</span>
+      الخدمات
+    </button>
+
+
+    <button
+      class="tab"
+      data-section="projects"
+    >
+      <span>◫</span>
+      المشاريع
+    </button>
+
+
+    <button
+      class="tab"
+      data-section="orders"
+    >
+      <span>⌁</span>
+      طلبات المواقع
+      <b id="ordersBadge">0</b>
+    </button>
+
+
+    <button
+      class="tab"
+      data-section="messages"
+    >
+      <span>✉</span>
+      الرسائل
+      <b id="messagesBadge">0</b>
+    </button>
+
+
+    <div class="sidebar-bottom">
+
+      <a
+        href="index.html"
+        target="_blank"
+        class="sidebar-site"
       >
-        🏠 الرئيسية
-      </button>
+        🌐 مشاهدة الموقع
+      </a>
+
 
       <button
-        class="nav-btn"
-        data-section="settings"
-      >
-        ⚙️ معلومات الموقع
-      </button>
-
-      <button
-        class="nav-btn"
-        data-section="services"
-      >
-        💻 الخدمات
-      </button>
-
-      <button
-        class="nav-btn"
-        data-section="projects"
-      >
-        🖼️ المشاريع
-      </button>
-
-      <button
-        class="nav-btn"
-        data-section="orders"
-      >
-        📦 طلبات المواقع
-      </button>
-
-      <button
-        class="nav-btn"
-        data-section="messages"
-      >
-        💬 الرسائل
-      </button>
-
-      <button
-        id="logoutBtn"
+        id="logoutButton"
         class="logout"
       >
         🚪 تسجيل الخروج
       </button>
 
-    </aside>
+    </div>
+
+  </aside>
 
 
-    <main class="main">
+  <main class="main">
 
-      <header class="topbar">
+
+    <header class="topbar">
+
+      <div>
+
+        <div class="topbar-kicker">
+          SITE WEB
+        </div>
+
+        <h2 id="pageTitle">
+          الرئيسية
+        </h2>
+
+      </div>
+
+
+      <div class="topbar-right">
+
+        <span class="online-dot">
+          متصل
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <!-- DASHBOARD -->
+
+    <section
+      id="dashboard"
+      class="section active"
+    >
+
+      <div class="welcome-card">
 
         <div>
-          <h2 id="pageTitle">
-            الرئيسية
-          </h2>
 
-          <span>
-            Site Web Administration
+          <span class="eyebrow">
+            CONTROL CENTER
           </span>
+
+          <h1>
+            مرحبًا بك 👋
+          </h1>
+
+          <p>
+            من هنا تتحكم في الموقع بالكامل.
+          </p>
+
         </div>
 
         <a
           href="index.html"
           target="_blank"
-          class="visit-btn"
+          class="main-btn"
         >
-          🌐 مشاهدة الموقع
+          مشاهدة الموقع
         </a>
 
-      </header>
+      </div>
 
 
-      <!-- DASHBOARD -->
+      <div class="stats">
 
-      <section
-        id="dashboard"
-        class="section active"
-      >
+        <div class="stat-card">
+          <span>الخدمات</span>
+          <strong id="servicesCount">0</strong>
+          <small>الخدمات المنشورة</small>
+        </div>
 
-        <div class="welcome">
+        <div class="stat-card">
+          <span>المشاريع</span>
+          <strong id="projectsCount">0</strong>
+          <small>أعمالك</small>
+        </div>
 
-          <h1>
-            مرحبًا 👋
-          </h1>
+        <div class="stat-card highlight">
+          <span>طلبات المواقع</span>
+          <strong id="ordersCount">0</strong>
+          <small>طلبات العملاء</small>
+        </div>
+
+        <div class="stat-card">
+          <span>الرسائل</span>
+          <strong id="messagesCount">0</strong>
+          <small>رسائل العملاء</small>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SETTINGS -->
+
+    <section
+      id="settings"
+      class="section"
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="eyebrow">
+            WEBSITE
+          </span>
+
+          <h2>
+            معلومات الموقع
+          </h2>
 
           <p>
-            من هنا تتحكم في موقعك وكل طلبات العملاء.
+            كل ما تغيّره هنا يظهر في الموقع.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <form
+        id="settingsForm"
+        class="admin-card"
+      >
+
+        <div class="form-grid">
+
+
+          <div class="field">
+            <label>اسم الموقع</label>
+            <input id="siteName">
+          </div>
+
+
+          <div class="field">
+            <label>اسمك</label>
+            <input id="ownerName">
+          </div>
+
+
+          <div class="field full">
+            <label>العنوان الرئيسي</label>
+            <input id="heroTitle">
+          </div>
+
+
+          <div class="field full">
+            <label>وصف الصفحة الرئيسية</label>
+            <textarea id="heroDescription"></textarea>
+          </div>
+
+
+          <div class="field">
+            <label>عنوان من أنا</label>
+            <input id="aboutTitle">
+          </div>
+
+
+          <div class="field">
+            <label>WhatsApp</label>
+            <input id="siteWhatsapp">
+          </div>
+
+
+          <div class="field">
+            <label>Email</label>
+            <input id="siteEmail">
+          </div>
+
+
+          <div class="field">
+            <label>رابط Instagram</label>
+            <input id="siteInstagram" type="url">
+          </div>
+
+
+          <div class="field full">
+            <label>نبذة عني</label>
+            <textarea id="aboutText"></textarea>
+          </div>
+
+
+          <!-- LOGO -->
+
+          <div class="field full">
+
+            <label>
+              الشعار
+            </label>
+
+            <div class="upload-row">
+
+              <label class="upload-btn">
+
+                📁 اختيار صورة
+
+                <input
+                  id="logoFile"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                >
+
+              </label>
+
+              <span class="file-name" id="logoFileName">
+                لم يتم اختيار صورة
+              </span>
+
+            </div>
+
+
+            <div class="image-preview small">
+              <img
+                id="logoPreview"
+                alt=""
+              >
+            </div>
+
+          </div>
+
+
+          <!-- PROFILE -->
+
+          <div class="field full">
+
+            <label>
+              صورة البروفايل
+            </label>
+
+            <div class="upload-row">
+
+              <label class="upload-btn">
+
+                📁 اختيار صورة
+
+                <input
+                  id="profileFile"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                >
+
+              </label>
+
+              <span class="file-name" id="profileFileName">
+                لم يتم اختيار صورة
+              </span>
+
+            </div>
+
+
+            <div class="image-preview profile-preview">
+              <img
+                id="profilePreview"
+                alt=""
+              >
+            </div>
+
+          </div>
+
+
+          <div class="field">
+            <label>اللون الأساسي</label>
+            <input id="primaryColor">
+          </div>
+
+
+          <div class="field">
+            <label>اللون الثاني</label>
+            <input id="secondaryColor">
+          </div>
+
+
+        </div>
+
+
+        <div class="checks">
+
+          <label>
+            <input id="showAbout" type="checkbox">
+            إظهار من أنا
+          </label>
+
+          <label>
+            <input id="showServices" type="checkbox">
+            إظهار الخدمات
+          </label>
+
+          <label>
+            <input id="showProjects" type="checkbox">
+            إظهار المشاريع
+          </label>
+
+          <label>
+            <input id="showContact" type="checkbox">
+            إظهار التواصل
+          </label>
+
+        </div>
+
+
+        <button
+          class="main-btn"
+          type="submit"
+        >
+          💾 حفظ التغييرات
+        </button>
+
+
+        <div
+          id="settingsResult"
+          class="result"
+        ></div>
+
+      </form>
+
+    </section>
+
+
+    <!-- SERVICES -->
+
+    <section
+      id="services"
+      class="section"
+    >
+
+      <div class="section-heading row-heading">
+
+        <div>
+
+          <span class="eyebrow">
+            SERVICES
+          </span>
+
+          <h2>
+            الخدمات
+          </h2>
+
+          <p>
+            أضف الخدمات وعدّلها واحذفها.
           </p>
 
         </div>
 
 
-        <div class="stats">
-
-          <div class="stat">
-            <span>الخدمات</span>
-            <strong id="servicesCount">0</strong>
-          </div>
-
-          <div class="stat">
-            <span>المشاريع</span>
-            <strong id="projectsCount">0</strong>
-          </div>
-
-          <div class="stat">
-            <span>طلبات المواقع</span>
-            <strong id="ordersCount">0</strong>
-          </div>
-
-          <div class="stat">
-            <span>الرسائل</span>
-            <strong id="messagesCount">0</strong>
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- SETTINGS -->
-
-      <section
-        id="settings"
-        class="section"
-      >
-
-        <div class="section-head">
-
-          <div>
-            <h2>معلومات الموقع</h2>
-
-            <p>
-              عدّل كل المعلومات التي تظهر في الموقع.
-            </p>
-          </div>
-
-        </div>
-
-
-        <form
-          id="settingsForm"
-          class="card"
+        <button
+          id="addService"
+          class="main-btn"
         >
+          + إضافة خدمة
+        </button>
 
-          <div class="grid">
-
-
-            <div class="field">
-              <label>اسم الموقع</label>
-              <input id="siteName">
-            </div>
+      </div>
 
 
-            <div class="field">
-              <label>اسمك</label>
-              <input id="ownerName">
-            </div>
+      <div
+        id="servicesList"
+        class="cards-grid"
+      ></div>
+
+    </section>
 
 
-            <div class="field full">
-              <label>العنوان الرئيسي</label>
-              <input id="heroTitle">
-            </div>
+    <!-- PROJECTS -->
 
+    <section
+      id="projects"
+      class="section"
+    >
 
-            <div class="field full">
-              <label>وصف الصفحة الرئيسية</label>
-              <textarea id="heroDescription"></textarea>
-            </div>
+      <div class="section-heading row-heading">
 
+        <div>
 
-            <div class="field">
-              <label>عنوان من أنا</label>
-              <input id="aboutTitle">
-            </div>
+          <span class="eyebrow">
+            PORTFOLIO
+          </span>
 
+          <h2>
+            المشاريع
+          </h2>
 
-            <div class="field">
-              <label>WhatsApp</label>
-              <input id="whatsapp">
-            </div>
-
-
-            <div class="field">
-              <label>Email</label>
-              <input id="siteEmail">
-            </div>
-
-
-            <div class="field">
-              <label>Instagram</label>
-              <input id="instagram">
-            </div>
-
-
-            <div class="field full">
-              <label>نبذة عني</label>
-              <textarea id="aboutText"></textarea>
-            </div>
-
-
-            <div class="field full">
-              <label>رابط صورة الشعار</label>
-              <input id="logoUrl">
-            </div>
-
-
-            <div class="field full">
-              <label>رابط صورة البروفايل</label>
-              <input id="profileUrl">
-            </div>
-
-
-            <div class="field">
-              <label>اللون الأساسي</label>
-              <input id="primaryColor">
-            </div>
-
-
-            <div class="field">
-              <label>اللون الثاني</label>
-              <input id="secondaryColor">
-            </div>
-
-          </div>
-
-
-          <div class="checks">
-
-            <label>
-              <input
-                id="showAbout"
-                type="checkbox"
-              >
-              إظهار من أنا
-            </label>
-
-            <label>
-              <input
-                id="showServices"
-                type="checkbox"
-              >
-              إظهار الخدمات
-            </label>
-
-            <label>
-              <input
-                id="showProjects"
-                type="checkbox"
-              >
-              إظهار المشاريع
-            </label>
-
-            <label>
-              <input
-                id="showContact"
-                type="checkbox"
-              >
-              إظهار التواصل
-            </label>
-
-          </div>
-
-
-          <button class="save-btn">
-            💾 حفظ التغييرات
-          </button>
-
-
-          <div id="settingsResult"></div>
-
-        </form>
-
-      </section>
-
-
-      <!-- SERVICES -->
-
-      <section
-        id="services"
-        class="section"
-      >
-
-        <div class="section-head">
-
-          <div>
-            <h2>الخدمات</h2>
-
-            <p>
-              أضف وعدّل واحذف الخدمات.
-            </p>
-          </div>
-
-          <button
-            id="addService"
-            class="add-btn"
-          >
-            + إضافة خدمة
-          </button>
+          <p>
+            أضف أعمالك مع الصور والروابط.
+          </p>
 
         </div>
 
 
-        <div
-          id="servicesList"
-          class="items"
-        ></div>
+        <button
+          id="addProject"
+          class="main-btn"
+        >
+          + إضافة مشروع
+        </button>
 
-      </section>
-
-
-      <!-- PROJECTS -->
-
-      <section
-        id="projects"
-        class="section"
-      >
-
-        <div class="section-head">
-
-          <div>
-            <h2>المشاريع</h2>
-
-            <p>
-              أضف مشاريعك وروابط أعمالك.
-            </p>
-          </div>
-
-          <button
-            id="addProject"
-            class="add-btn"
-          >
-            + إضافة مشروع
-          </button>
-
-        </div>
+      </div>
 
 
-        <div
-          id="projectsList"
-          class="items"
-        ></div>
+      <div
+        id="projectsList"
+        class="cards-grid"
+      ></div>
 
-      </section>
-
-
-      <!-- ORDERS -->
-
-      <section
-        id="orders"
-        class="section"
-      >
-
-        <div class="section-head">
-
-          <div>
-            <h2>طلبات المواقع</h2>
-
-            <p>
-              الطلبات التي يرسلها العملاء من الموقع.
-            </p>
-          </div>
-
-        </div>
+    </section>
 
 
-        <div
-          id="ordersList"
-          class="orders"
-        ></div>
+    <!-- ORDERS -->
 
-      </section>
+    <section
+      id="orders"
+      class="section"
+    >
 
+      <div class="section-heading">
 
-      <!-- MESSAGES -->
+        <span class="eyebrow">
+          LEADS
+        </span>
 
-      <section
-        id="messages"
-        class="section"
-      >
+        <h2>
+          طلبات المواقع
+        </h2>
 
-        <div class="section-head">
+        <p>
+          كل طلب يرسله العميل من زر «اطلب موقعك».
+        </p>
 
-          <div>
-            <h2>الرسائل</h2>
-
-            <p>
-              رسائل العملاء.
-            </p>
-          </div>
-
-        </div>
+      </div>
 
 
-        <div
-          id="messagesList"
-          class="orders"
-        ></div>
+      <div id="ordersList" class="orders-list"></div>
 
-      </section>
-
-    </main>
-
-  </div>
+    </section>
 
 
-  <!-- SERVICE MODAL -->
+    <!-- MESSAGES -->
 
-  <div
-    id="serviceModal"
-    class="modal hidden"
-  >
+    <section
+      id="messages"
+      class="section"
+    >
 
-    <div class="modal-box">
+      <div class="section-heading">
 
-      <button
-        id="closeService"
-        class="close"
-      >
-        ×
-      </button>
+        <span class="eyebrow">
+          MESSAGES
+        </span>
+
+        <h2>
+          الرسائل
+        </h2>
+
+        <p>
+          رسائل نموذج التواصل.
+        </p>
+
+      </div>
+
+
+      <div
+        id="messagesList"
+        class="orders-list"
+      ></div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- SERVICE MODAL -->
+
+<div
+  id="serviceModal"
+  class="modal hidden"
+>
+
+  <div class="modal-box">
+
+    <button
+      id="closeService"
+      class="modal-close"
+    >
+      ×
+    </button>
+
+
+    <div class="modal-heading">
+      <span class="eyebrow">
+        SERVICE
+      </span>
 
       <h2 id="serviceModalTitle">
         إضافة خدمة
       </h2>
-
-
-      <form id="serviceForm">
-
-        <input
-          id="serviceId"
-          type="hidden"
-        >
-
-        <div class="field">
-          <label>اسم الخدمة</label>
-          <input id="serviceTitle" required>
-        </div>
-
-        <div class="field">
-          <label>الوصف</label>
-          <textarea id="serviceDescription"></textarea>
-        </div>
-
-        <div class="field">
-          <label>السعر</label>
-          <input id="servicePrice">
-        </div>
-
-        <div class="field">
-          <label>Icon</label>
-          <input id="serviceIcon" value="💻">
-        </div>
-
-        <div class="field">
-          <label>رابط الصورة</label>
-          <input id="serviceImage">
-        </div>
-
-        <button class="save-btn">
-          حفظ الخدمة
-        </button>
-
-      </form>
-
     </div>
+
+
+    <form id="serviceForm">
+
+      <input
+        id="serviceId"
+        type="hidden"
+      >
+
+
+      <div class="field">
+        <label>اسم الخدمة</label>
+        <input id="serviceTitle" required>
+      </div>
+
+
+      <div class="field">
+        <label>الوصف</label>
+        <textarea id="serviceDescription"></textarea>
+      </div>
+
+
+      <div class="field">
+        <label>السعر</label>
+        <input
+          id="servicePrice"
+          placeholder="ابتداءً من 5000 DA"
+        >
+      </div>
+
+
+      <div class="field">
+        <label>Icon</label>
+        <input
+          id="serviceIcon"
+          value="💻"
+        >
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          صورة الخدمة
+        </label>
+
+        <div class="upload-row">
+
+          <label class="upload-btn">
+
+            📁 اختيار صورة
+
+            <input
+              id="serviceImageFile"
+              type="file"
+              accept="image/*"
+              hidden
+            >
+
+          </label>
+
+          <span
+            id="serviceImageName"
+            class="file-name"
+          >
+            لم يتم اختيار صورة
+          </span>
+
+        </div>
+
+
+        <div class="image-preview">
+          <img
+            id="serviceImagePreview"
+            alt=""
+          >
+        </div>
+
+      </div>
+
+
+      <button
+        class="main-btn full"
+        type="submit"
+      >
+        حفظ الخدمة
+      </button>
+
+    </form>
 
   </div>
 
+</div>
 
-  <!-- PROJECT MODAL -->
 
-  <div
-    id="projectModal"
-    class="modal hidden"
-  >
+<!-- PROJECT MODAL -->
 
-    <div class="modal-box">
+<div
+  id="projectModal"
+  class="modal hidden"
+>
 
-      <button
-        id="closeProject"
-        class="close"
-      >
-        ×
-      </button>
+  <div class="modal-box">
+
+    <button
+      id="closeProject"
+      class="modal-close"
+    >
+      ×
+    </button>
+
+
+    <div class="modal-heading">
+
+      <span class="eyebrow">
+        PROJECT
+      </span>
 
       <h2 id="projectModalTitle">
         إضافة مشروع
       </h2>
 
+    </div>
 
-      <form id="projectForm">
+
+    <form id="projectForm">
+
+      <input
+        id="projectId"
+        type="hidden"
+      >
+
+
+      <div class="field">
+        <label>اسم المشروع</label>
+        <input id="projectTitle" required>
+      </div>
+
+
+      <div class="field">
+        <label>الوصف</label>
+        <textarea id="projectDescription"></textarea>
+      </div>
+
+
+      <div class="field">
+        <label>التصنيف</label>
+        <input
+          id="projectCategory"
+          placeholder="Website"
+        >
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          صورة المشروع
+        </label>
+
+        <div class="upload-row">
+
+          <label class="upload-btn">
+
+            📁 اختيار صورة
+
+            <input
+              id="projectImageFile"
+              type="file"
+              accept="image/*"
+              hidden
+            >
+
+          </label>
+
+          <span
+            id="projectImageName"
+            class="file-name"
+          >
+            لم يتم اختيار صورة
+          </span>
+
+        </div>
+
+
+        <div class="image-preview">
+          <img
+            id="projectImagePreview"
+            alt=""
+          >
+        </div>
+
+      </div>
+
+
+      <div class="field">
+        <label>رابط المشروع</label>
 
         <input
-          id="projectId"
-          type="hidden"
+          id="projectUrl"
+          type="url"
+          placeholder="https://..."
         >
+      </div>
 
-        <div class="field">
-          <label>اسم المشروع</label>
-          <input id="projectTitle" required>
-        </div>
 
-        <div class="field">
-          <label>الوصف</label>
-          <textarea id="projectDescription"></textarea>
-        </div>
+      <button
+        class="main-btn full"
+        type="submit"
+      >
+        حفظ المشروع
+      </button>
 
-        <div class="field">
-          <label>التصنيف</label>
-          <input id="projectCategory">
-        </div>
-
-        <div class="field">
-          <label>رابط الصورة</label>
-          <input id="projectImage">
-        </div>
-
-        <div class="field">
-          <label>رابط المشروع</label>
-          <input id="projectUrl">
-        </div>
-
-        <button class="save-btn">
-          حفظ المشروع
-        </button>
-
-      </form>
-
-    </div>
+    </form>
 
   </div>
 
+</div>
 
-  <script src="admin.js"></script>
+
+<script src="admin.js"></script>
 
 </body>
 </html>
