@@ -11,9 +11,9 @@ const supabaseClient =
   );
 
 
-/* =========================
+/* =========================================
    HELPERS
-========================= */
+========================================= */
 
 function escapeHTML(value) {
 
@@ -30,54 +30,183 @@ function escapeHTML(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+
+function show(element) {
+  element.classList.remove("hidden");
+}
+
+
+function hide(element) {
+  element.classList.add("hidden");
+}
+
+
+function notify(element, text, type = "") {
+
+  element.textContent = text;
+
+  element.className =
+    `result ${type}`;
 
 }
 
 
-function showAdmin() {
+function formatDate(date) {
 
-  document
-    .getElementById("loginPage")
-    .classList.add("hidden");
+  if (!date) {
+    return "";
+  }
 
-  document
-    .getElementById("adminPage")
-    .classList.remove("hidden");
-
-}
-
-
-function showLogin() {
-
-  document
-    .getElementById("adminPage")
-    .classList.add("hidden");
-
-  document
-    .getElementById("loginPage")
-    .classList.remove("hidden");
+  return new Date(
+    date
+  ).toLocaleString(
+    "fr-DZ"
+  );
 
 }
 
 
-/* =========================
-   ADMIN CHECK
-========================= */
+function toWhatsApp(phone) {
 
-async function isAdmin(userId) {
+  let value =
+    String(phone || "")
+      .replace(/\D/g, "");
+
+  if (value.startsWith("0")) {
+    value = "213" + value.slice(1);
+  }
+
+  if (!value.startsWith("213")) {
+    value = "213" + value;
+  }
+
+  return `https://wa.me/${value}`;
+}
+
+
+/* =========================================
+   IMAGE UPLOAD
+========================================= */
+
+async function uploadImage(
+  file,
+  folder
+) {
+
+  if (!file) {
+    return null;
+  }
+
+
+  if (!file.type.startsWith("image/")) {
+
+    throw new Error(
+      "الملف ليس صورة."
+    );
+
+  }
+
+
+  if (
+    file.size >
+    5 * 1024 * 1024
+  ) {
+
+    throw new Error(
+      "حجم الصورة أكبر من 5MB."
+    );
+
+  }
+
+
+  const extension =
+    file.name.includes(".")
+      ? file.name
+          .split(".")
+          .pop()
+          .toLowerCase()
+      : "jpg";
+
+
+  const fileName =
+    `${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 9)}.${extension}`;
+
+
+  const path =
+    `${folder}/${fileName}`;
+
+
+  const {
+    error
+  } =
+    await supabaseClient.storage
+      .from("site-images")
+      .upload(
+        path,
+        file,
+        {
+          cacheControl: "3600",
+          upsert: false
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  const {
+    data
+  } =
+    supabaseClient.storage
+      .from("site-images")
+      .getPublicUrl(path);
+
+
+  return data.publicUrl;
+
+}
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+const loginPage =
+  document.getElementById(
+    "loginPage"
+  );
+
+const adminApp =
+  document.getElementById(
+    "adminApp"
+  );
+
+const loginForm =
+  document.getElementById(
+    "loginForm"
+  );
+
+const loginError =
+  document.getElementById(
+    "loginError"
+  );
+
+
+async function checkAdmin() {
 
   const {
     data,
     error
   } =
-    await supabaseClient
-      .from("admins")
-      .select("user_id")
-      .eq(
-        "user_id",
-        userId
-      )
-      .maybeSingle();
+    await supabaseClient.rpc(
+      "is_admin"
+    );
 
 
   if (error) {
@@ -88,14 +217,11 @@ async function isAdmin(userId) {
 
   }
 
-  return !!data;
+
+  return data === true;
 
 }
 
-
-/* =========================
-   SESSION
-========================= */
 
 async function checkSession() {
 
@@ -110,7 +236,8 @@ async function checkSession() {
 
   if (!session) {
 
-    showLogin();
+    hide(adminApp);
+    show(loginPage);
 
     return;
 
@@ -118,9 +245,7 @@ async function checkSession() {
 
 
   const admin =
-    await isAdmin(
-      session.user.id
-    );
+    await checkAdmin();
 
 
   if (!admin) {
@@ -128,131 +253,126 @@ async function checkSession() {
     await supabaseClient.auth
       .signOut();
 
-    showLogin();
+    hide(adminApp);
+    show(loginPage);
+
+    loginError.textContent =
+      "هذا الحساب ليس Admin.";
 
     return;
 
   }
 
 
-  showAdmin();
+  show(adminApp);
+  hide(loginPage);
 
-  loadEverything();
+  await loadEverything();
 
 }
 
 
-/* =========================
-   LOGIN
-========================= */
+loginForm.addEventListener(
+  "submit",
+  async (event) => {
 
-document
-  .getElementById("loginForm")
-  .addEventListener(
-    "submit",
-    async (event) => {
-
-      event.preventDefault();
+    event.preventDefault();
 
 
-      const email =
-        document
-          .getElementById("email")
-          .value
-          .trim();
+    loginError.textContent =
+      "";
 
 
-      const password =
-        document
-          .getElementById("password")
-          .value;
+    const email =
+      document
+        .getElementById(
+          "loginEmail"
+        )
+        .value
+        .trim();
 
 
-      const errorBox =
-        document
-          .getElementById(
-            "loginError"
-          );
+    const password =
+      document
+        .getElementById(
+          "loginPassword"
+        )
+        .value;
 
 
-      const button =
-        event.target.querySelector(
-          "button"
-        );
+    const button =
+      document.getElementById(
+        "loginButton"
+      );
 
 
-      button.disabled = true;
+    button.disabled = true;
 
-      button.textContent =
-        "جاري الدخول...";
-
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth
-          .signInWithPassword({
-
-            email,
-            password
-
-          });
+    button.textContent =
+      "جاري الدخول...";
 
 
-      button.disabled = false;
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInWithPassword({
 
-      button.textContent =
-        "دخول";
+          email,
+          password
 
-
-      if (error) {
-
-        console.error(error);
-
-        errorBox.textContent =
-          "البريد الإلكتروني أو كلمة السر غير صحيحة.";
-
-        return;
-
-      }
+        });
 
 
-      const admin =
-        await isAdmin(
-          data.user.id
-        );
+    button.disabled = false;
+
+    button.textContent =
+      "دخول الإدارة";
 
 
-      if (!admin) {
+    if (error) {
 
-        await supabaseClient.auth
-          .signOut();
+      console.error(error);
 
-        errorBox.textContent =
-          "هذا الحساب ليس Admin.";
+      loginError.textContent =
+        "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
 
-        return;
-
-      }
-
-
-      errorBox.textContent = "";
-
-      showAdmin();
-
-      loadEverything();
+      return;
 
     }
-  );
 
 
-/* =========================
-   LOGOUT
-========================= */
+    const admin =
+      await checkAdmin();
+
+
+    if (!admin) {
+
+      await supabaseClient.auth
+        .signOut();
+
+      loginError.textContent =
+        "الحساب غير مضاف كـAdmin.";
+
+      return;
+
+    }
+
+
+    show(adminApp);
+    hide(loginPage);
+
+    await loadEverything();
+
+  }
+);
+
 
 document
-  .getElementById("logoutBtn")
+  .getElementById(
+    "logoutButton"
+  )
   .addEventListener(
     "click",
     async () => {
@@ -260,53 +380,60 @@ document
       await supabaseClient.auth
         .signOut();
 
-      showLogin();
+      hide(adminApp);
+      show(loginPage);
 
     }
   );
 
 
-/* =========================
+/* =========================================
    NAVIGATION
-========================= */
+========================================= */
+
+const pageTitle =
+  document.getElementById(
+    "pageTitle"
+  );
+
 
 document
-  .querySelectorAll(".nav-btn")
-  .forEach((button) => {
+  .querySelectorAll(".tab")
+  .forEach((tab) => {
 
-    button.addEventListener(
+    tab.addEventListener(
       "click",
-      () => {
+      async () => {
 
         const target =
-          button.dataset.section;
+          tab.dataset.section;
 
 
         document
-          .querySelectorAll(".nav-btn")
-          .forEach((item) => {
+          .querySelectorAll(".tab")
+          .forEach(
+            (item) =>
+              item.classList.remove(
+                "active"
+              )
+          );
 
-            item.classList.remove(
-              "active"
-            );
 
-          });
-
-
-        button.classList.add(
+        tab.classList.add(
           "active"
         );
 
 
         document
-          .querySelectorAll(".section")
-          .forEach((section) => {
-
-            section.classList.remove(
-              "active"
-            );
-
-          });
+          .querySelectorAll(
+            ".section"
+          )
+          .forEach(
+            (section) =>
+              section.classList.remove(
+                "active"
+              )
+          );
 
 
         document
@@ -318,27 +445,30 @@ document
 
         const titles = {
 
-          dashboard: "الرئيسية",
+          dashboard:
+            "الرئيسية",
 
-          settings: "معلومات الموقع",
+          settings:
+            "معلومات الموقع",
 
-          services: "الخدمات",
+          services:
+            "الخدمات",
 
-          projects: "المشاريع",
+          projects:
+            "المشاريع",
 
-          orders: "طلبات المواقع",
+          orders:
+            "طلبات المواقع",
 
-          messages: "الرسائل"
+          messages:
+            "الرسائل"
 
         };
 
 
-        document
-          .getElementById(
-            "pageTitle"
-          )
-          .textContent =
-          titles[target];
+        pageTitle.textContent =
+          titles[target] ||
+          "Admin";
 
       }
     );
@@ -346,9 +476,12 @@ document
   });
 
 
-/* =========================
+/* =========================================
    SETTINGS
-========================= */
+========================================= */
+
+let currentSettings = null;
+
 
 async function loadSettings() {
 
@@ -377,78 +510,69 @@ async function loadSettings() {
   }
 
 
+  currentSettings =
+    data;
+
+
   document.getElementById(
     "siteName"
   ).value =
-    data.site_name || "";
-
+    data.site_name ||
+    "";
 
   document.getElementById(
     "ownerName"
   ).value =
-    data.owner_name || "";
-
+    data.owner_name ||
+    "";
 
   document.getElementById(
     "heroTitle"
   ).value =
-    data.hero_title || "";
-
+    data.hero_title ||
+    "";
 
   document.getElementById(
     "heroDescription"
   ).value =
-    data.hero_description || "";
-
+    data.hero_description ||
+    "";
 
   document.getElementById(
     "aboutTitle"
   ).value =
-    data.about_title || "";
-
+    data.about_title ||
+    "";
 
   document.getElementById(
-    "whatsapp"
+    "siteWhatsapp"
   ).value =
-    data.whatsapp || "";
-
+    data.whatsapp ||
+    "";
 
   document.getElementById(
     "siteEmail"
   ).value =
-    data.email || "";
-
+    data.email ||
+    "";
 
   document.getElementById(
-    "instagram"
+    "siteInstagram"
   ).value =
-    data.instagram_url || "";
-
+    data.instagram_url ||
+    "";
 
   document.getElementById(
     "aboutText"
   ).value =
-    data.about_text || "";
-
-
-  document.getElementById(
-    "logoUrl"
-  ).value =
-    data.logo_url || "";
-
-
-  document.getElementById(
-    "profileUrl"
-  ).value =
-    data.profile_image_url || "";
-
+    data.about_text ||
+    "";
 
   document.getElementById(
     "primaryColor"
   ).value =
     data.primary_color ||
     "#7c3aed";
-
 
   document.getElementById(
     "secondaryColor"
@@ -462,29 +586,147 @@ async function loadSettings() {
   ).checked =
     data.show_about !== false;
 
-
   document.getElementById(
     "showServices"
   ).checked =
     data.show_services !== false;
-
 
   document.getElementById(
     "showProjects"
   ).checked =
     data.show_portfolio !== false;
 
-
   document.getElementById(
     "showContact"
   ).checked =
     data.show_contact !== false;
 
+
+  setImagePreview(
+    document.getElementById(
+      "logoPreview"
+    ),
+    data.logo_url
+  );
+
+
+  setImagePreview(
+    document.getElementById(
+      "profilePreview"
+    ),
+    data.profile_image_url
+  );
+
 }
 
 
+function setImagePreview(
+  img,
+  url
+) {
+
+  if (url) {
+
+    img.src =
+      url;
+
+    img.style.display =
+      "block";
+
+  } else {
+
+    img.removeAttribute(
+      "src"
+    );
+
+    img.style.display =
+      "none";
+
+  }
+
+}
+
+
+/* FILE PREVIEWS */
+
 document
-  .getElementById("settingsForm")
+  .getElementById(
+    "logoFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+      document.getElementById(
+        "logoFileName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "logoPreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "profileFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+      document.getElementById(
+        "profileFileName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "profilePreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
+
+
+/* SAVE SETTINGS */
+
+document
+  .getElementById(
+    "settingsForm"
+  )
   .addEventListener(
     "submit",
     async (event) => {
@@ -492,14 +734,15 @@ document
       event.preventDefault();
 
 
-      const result =
+      const output =
         document.getElementById(
           "settingsResult"
         );
 
 
       const {
-        data: current
+        data: row,
+        error: rowError
       } =
         await supabaseClient
           .from("site_settings")
@@ -508,157 +751,260 @@ document
           .maybeSingle();
 
 
-      if (!current) {
+      if (rowError || !row) {
 
-        result.textContent =
-          "لم يتم العثور على إعدادات.";
+        notify(
+          output,
+          "لم يتم العثور على إعدادات.",
+          "error"
+        );
 
         return;
 
       }
 
 
-      const updates = {
+      try {
 
-        site_name:
-          document.getElementById(
-            "siteName"
-          ).value.trim(),
+        let logoUrl =
+          currentSettings?.logo_url ||
+          "";
 
-        owner_name:
-          document.getElementById(
-            "ownerName"
-          ).value.trim(),
-
-        hero_title:
-          document.getElementById(
-            "heroTitle"
-          ).value.trim(),
-
-        hero_description:
-          document.getElementById(
-            "heroDescription"
-          ).value.trim(),
-
-        about_title:
-          document.getElementById(
-            "aboutTitle"
-          ).value.trim(),
-
-        whatsapp:
-          document.getElementById(
-            "whatsapp"
-          ).value.trim(),
-
-        email:
-          document.getElementById(
-            "siteEmail"
-          ).value.trim(),
-
-        instagram_url:
-          document.getElementById(
-            "instagram"
-          ).value.trim(),
-
-        about_text:
-          document.getElementById(
-            "aboutText"
-          ).value.trim(),
-
-        logo_url:
-          document.getElementById(
-            "logoUrl"
-          ).value.trim(),
-
-        profile_image_url:
-          document.getElementById(
-            "profileUrl"
-          ).value.trim(),
-
-        primary_color:
-          document.getElementById(
-            "primaryColor"
-          ).value.trim(),
-
-        secondary_color:
-          document.getElementById(
-            "secondaryColor"
-          ).value.trim(),
-
-        show_about:
-          document.getElementById(
-            "showAbout"
-          ).checked,
-
-        show_services:
-          document.getElementById(
-            "showServices"
-          ).checked,
-
-        show_portfolio:
-          document.getElementById(
-            "showProjects"
-          ).checked,
-
-        show_contact:
-          document.getElementById(
-            "showContact"
-          ).checked,
-
-        updated_at:
-          new Date().toISOString()
-
-      };
+        let profileUrl =
+          currentSettings?.profile_image_url ||
+          "";
 
 
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("site_settings")
-          .update(updates)
-          .eq(
-            "id",
-            current.id
-          );
+        const logoFile =
+          document
+            .getElementById(
+              "logoFile"
+            )
+            .files[0];
 
 
-      if (error) {
+        if (logoFile) {
+
+          logoUrl =
+            await uploadImage(
+              logoFile,
+              "branding"
+            );
+
+        }
+
+
+        const profileFile =
+          document
+            .getElementById(
+              "profileFile"
+            )
+            .files[0];
+
+
+        if (profileFile) {
+
+          profileUrl =
+            await uploadImage(
+              profileFile,
+              "branding"
+            );
+
+        }
+
+
+        const update = {
+
+          site_name:
+            document
+              .getElementById(
+                "siteName"
+              )
+              .value
+              .trim(),
+
+          owner_name:
+            document
+              .getElementById(
+                "ownerName"
+              )
+              .value
+              .trim(),
+
+          hero_title:
+            document
+              .getElementById(
+                "heroTitle"
+              )
+              .value
+              .trim(),
+
+          hero_description:
+            document
+              .getElementById(
+                "heroDescription"
+              )
+              .value
+              .trim(),
+
+          about_title:
+            document
+              .getElementById(
+                "aboutTitle"
+              )
+              .value
+              .trim(),
+
+          about_text:
+            document
+              .getElementById(
+                "aboutText"
+              )
+              .value
+              .trim(),
+
+          whatsapp:
+            document
+              .getElementById(
+                "siteWhatsapp"
+              )
+              .value
+              .trim(),
+
+          email:
+            document
+              .getElementById(
+                "siteEmail"
+              )
+              .value
+              .trim(),
+
+          instagram_url:
+            document
+              .getElementById(
+                "siteInstagram"
+              )
+              .value
+              .trim(),
+
+          logo_url:
+            logoUrl,
+
+          profile_image_url:
+            profileUrl,
+
+          primary_color:
+            document
+              .getElementById(
+                "primaryColor"
+              )
+              .value
+              .trim(),
+
+          secondary_color:
+            document
+              .getElementById(
+                "secondaryColor"
+              )
+              .value
+              .trim(),
+
+          show_about:
+            document
+              .getElementById(
+                "showAbout"
+              )
+              .checked,
+
+          show_services:
+            document
+              .getElementById(
+                "showServices"
+              )
+              .checked,
+
+          show_portfolio:
+            document
+              .getElementById(
+                "showProjects"
+              )
+              .checked,
+
+          show_contact:
+            document
+              .getElementById(
+                "showContact"
+              )
+              .checked,
+
+          updated_at:
+            new Date().toISOString()
+
+        };
+
+
+        const {
+          error
+        } =
+          await supabaseClient
+            .from("site_settings")
+            .update(
+              update
+            )
+            .eq(
+              "id",
+              row.id
+            );
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        currentSettings = {
+          ...currentSettings,
+          ...update
+        };
+
+
+        notify(
+          output,
+          "✅ تم حفظ كل التغييرات.",
+          "success"
+        );
+
+      } catch (error) {
 
         console.error(error);
 
-        result.textContent =
-          "حدث خطأ أثناء الحفظ.";
-
-        result.style.color =
-          "#f87171";
-
-        return;
+        notify(
+          output,
+          error.message ||
+            "حدث خطأ أثناء الحفظ.",
+          "error"
+        );
 
       }
-
-
-      result.textContent =
-        "✅ تم الحفظ بنجاح.";
-
-      result.style.color =
-        "#86efac";
 
     }
   );
 
 
-/* =========================
+/* =========================================
    SERVICES
-========================= */
+========================================= */
+
+let serviceEditingId =
+  null;
+
+const servicesList =
+  document.getElementById(
+    "servicesList"
+  );
+
 
 async function loadServices() {
-
-  const list =
-    document.getElementById(
-      "servicesList"
-    );
-
 
   const {
     data,
@@ -685,8 +1031,12 @@ async function loadServices() {
 
     console.error(error);
 
-    list.innerHTML =
-      `<div class="empty">حدث خطأ.</div>`;
+    servicesList.innerHTML =
+      `
+        <div class="empty">
+          حدث خطأ في تحميل الخدمات.
+        </div>
+      `;
 
     return;
 
@@ -701,98 +1051,115 @@ async function loadServices() {
 
   if (!data.length) {
 
-    list.innerHTML =
-      `<div class="empty">
-        لا توجد خدمات.
-      </div>`;
+    servicesList.innerHTML =
+      `
+        <div class="empty">
+          لا توجد خدمات. اضغط «إضافة خدمة».
+        </div>
+      `;
 
     return;
 
   }
 
 
-  list.innerHTML =
+  servicesList.innerHTML =
     data
-      .map((item) => {
+      .map(
+        (item) => {
 
-        return `
-          <article class="admin-item">
+          return `
+            <article class="admin-item">
 
-            ${
-              item.image_url
-                ? `
-                  <img
-                    src="${escapeHTML(
-                      item.image_url
-                    )}"
-                    alt=""
+              ${
+                item.image_url
+                  ? `
+                    <img
+                      class="admin-item-image"
+                      src="${escapeHTML(
+                        item.image_url
+                      )}"
+                      alt=""
+                    >
+                  `
+                  : `
+                    <div
+                      class="admin-item-image"
+                    ></div>
+                  `
+              }
+
+
+              <div class="admin-item-body">
+
+                <h3>
+                  ${escapeHTML(
+                    item.icon || "💻"
+                  )}
+                  ${escapeHTML(
+                    item.title
+                  )}
+                </h3>
+
+
+                <p>
+                  ${escapeHTML(
+                    item.description ||
+                    ""
+                  )}
+                </p>
+
+
+                <div class="item-meta">
+                  ${escapeHTML(
+                    item.price ||
+                    ""
+                  )}
+                </div>
+
+
+                <div class="item-actions">
+
+                  <button
+                    class="edit-btn"
+                    onclick="openEditService('${item.id}')"
                   >
-                `
-                : ""
-            }
-
-            <div class="admin-item-content">
-
-              <h4>
-                ${escapeHTML(
-                  item.icon ||
-                  "💻"
-                )}
-                ${escapeHTML(
-                  item.title
-                )}
-              </h4>
-
-              <p>
-                ${escapeHTML(
-                  item.description ||
-                  ""
-                )}
-              </p>
-
-              <div class="price">
-                ${escapeHTML(
-                  item.price ||
-                  ""
-                )}
-              </div>
+                    تعديل
+                  </button>
 
 
-              <div class="actions">
+                  <button
+                    class="delete-btn"
+                    onclick="removeService('${item.id}')"
+                  >
+                    حذف
+                  </button>
 
-                <button
-                  class="edit"
-                  onclick="editService('${item.id}')"
-                >
-                  تعديل
-                </button>
-
-
-                <button
-                  class="delete"
-                  onclick="deleteService('${item.id}')"
-                >
-                  حذف
-                </button>
+                </div>
 
               </div>
 
-            </div>
+            </article>
+          `;
 
-          </article>
-        `;
-
-      })
+        }
+      )
       .join("");
 
 }
 
 
 document
-  .getElementById("addService")
+  .getElementById(
+    "addService"
+  )
   .addEventListener(
     "click",
     () => {
+
+      serviceEditingId =
+        null;
+
 
       document
         .getElementById(
@@ -801,15 +1168,28 @@ document
         .reset();
 
 
-      document.getElementById(
-        "serviceId"
-      ).value = "";
-
-
-      document.getElementById(
-        "serviceModalTitle"
-      ).textContent =
+      document
+        .getElementById(
+          "serviceModalTitle"
+        )
+        .textContent =
         "إضافة خدمة";
+
+
+      document
+        .getElementById(
+          "serviceImageName"
+        )
+        .textContent =
+        "لم يتم اختيار صورة";
+
+
+      setImagePreview(
+        document.getElementById(
+          "serviceImagePreview"
+        ),
+        ""
+      );
 
 
       document
@@ -824,7 +1204,7 @@ document
   );
 
 
-window.editService =
+window.openEditService =
   async function(id) {
 
     const {
@@ -834,10 +1214,7 @@ window.editService =
       await supabaseClient
         .from("services")
         .select("*")
-        .eq(
-          "id",
-          id
-        )
+        .eq("id", id)
         .single();
 
 
@@ -852,40 +1229,57 @@ window.editService =
     }
 
 
-    document.getElementById(
-      "serviceId"
-    ).value =
-      data.id;
+    serviceEditingId =
+      id;
 
 
     document.getElementById(
       "serviceTitle"
     ).value =
-      data.title || "";
-
+      data.title ||
+      "";
 
     document.getElementById(
       "serviceDescription"
     ).value =
-      data.description || "";
-
+      data.description ||
+      "";
 
     document.getElementById(
       "servicePrice"
     ).value =
-      data.price || "";
-
+      data.price ||
+      "";
 
     document.getElementById(
       "serviceIcon"
     ).value =
-      data.icon || "💻";
+      data.icon ||
+      "💻";
+
+
+    document
+      .getElementById(
+        "serviceImageFile"
+      )
+      .value =
+      "";
 
 
     document.getElementById(
-      "serviceImage"
-    ).value =
-      data.image_url || "";
+      "serviceImageName"
+    ).textContent =
+      data.image_url
+        ? "الصورة الحالية"
+        : "لم يتم اختيار صورة";
+
+
+    setImagePreview(
+      document.getElementById(
+        "serviceImagePreview"
+      ),
+      data.image_url
+    );
 
 
     document.getElementById(
@@ -906,7 +1300,46 @@ window.editService =
 
 
 document
-  .getElementById("serviceForm")
+  .getElementById(
+    "serviceImageFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+
+      document.getElementById(
+        "serviceImageName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "serviceImagePreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "serviceForm"
+  )
   .addEventListener(
     "submit",
     async (event) => {
@@ -914,105 +1347,187 @@ document
       event.preventDefault();
 
 
-      const id =
-        document.getElementById(
-          "serviceId"
-        ).value;
+      const button =
+        event.target.querySelector(
+          "button[type='submit']"
+        );
 
 
-      const item = {
-
-        title:
-          document.getElementById(
-            "serviceTitle"
-          ).value.trim(),
-
-        description:
-          document.getElementById(
-            "serviceDescription"
-          ).value.trim(),
-
-        price:
-          document.getElementById(
-            "servicePrice"
-          ).value.trim(),
-
-        icon:
-          document.getElementById(
-            "serviceIcon"
-          ).value.trim(),
-
-        image_url:
-          document.getElementById(
-            "serviceImage"
-          ).value.trim()
-
-      };
+      button.disabled = true;
+      button.textContent =
+        "جاري الحفظ...";
 
 
-      let error;
+      try {
+
+        let imageUrl = "";
 
 
-      if (id) {
+        if (
+          serviceEditingId
+        ) {
 
-        const result =
-          await supabaseClient
-            .from("services")
-            .update(item)
-            .eq(
-              "id",
-              id
+          const {
+            data: old
+          } =
+            await supabaseClient
+              .from("services")
+              .select("image_url")
+              .eq(
+                "id",
+                serviceEditingId
+              )
+              .single();
+
+
+          imageUrl =
+            old?.image_url ||
+            "";
+
+        }
+
+
+        const file =
+          document
+            .getElementById(
+              "serviceImageFile"
+            )
+            .files[0];
+
+
+        if (file) {
+
+          imageUrl =
+            await uploadImage(
+              file,
+              "services"
             );
 
-        error =
-          result.error;
-
-      } else {
-
-        const result =
-          await supabaseClient
-            .from("services")
-            .insert([item]);
-
-        error =
-          result.error;
-
-      }
+        }
 
 
-      if (error) {
+        const payload = {
+
+          title:
+            document
+              .getElementById(
+                "serviceTitle"
+              )
+              .value
+              .trim(),
+
+          description:
+            document
+              .getElementById(
+                "serviceDescription"
+              )
+              .value
+              .trim(),
+
+          price:
+            document
+              .getElementById(
+                "servicePrice"
+              )
+              .value
+              .trim(),
+
+          icon:
+            document
+              .getElementById(
+                "serviceIcon"
+              )
+              .value
+              .trim() ||
+            "💻",
+
+          image_url:
+            imageUrl
+
+        };
+
+
+        if (
+          serviceEditingId
+        ) {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("services")
+              .update(
+                payload
+              )
+              .eq(
+                "id",
+                serviceEditingId
+              );
+
+
+          if (error) {
+            throw error;
+          }
+
+        } else {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("services")
+              .insert([
+                payload
+              ]);
+
+
+          if (error) {
+            throw error;
+          }
+
+        }
+
+
+        document
+          .getElementById(
+            "serviceModal"
+          )
+          .classList.add(
+            "hidden"
+          );
+
+
+        await loadServices();
+
+        button.disabled = false;
+        button.textContent =
+          "حفظ الخدمة";
+
+      } catch (error) {
 
         console.error(error);
 
         alert(
-          "حدث خطأ أثناء الحفظ."
+          error.message ||
+          "حدث خطأ أثناء حفظ الخدمة."
         );
 
-        return;
+        button.disabled = false;
+        button.textContent =
+          "حفظ الخدمة";
 
       }
 
-
-      document
-        .getElementById(
-          "serviceModal"
-        )
-        .classList.add(
-          "hidden"
-        );
+    }
+  );
 
 
-      await loadServices();
-
-  });
-
-
-window.deleteService =
+window.removeService =
   async function(id) {
 
     if (
       !confirm(
-        "هل تريد حذف الخدمة؟"
+        "هل تريد حذف هذه الخدمة؟"
       )
     ) {
       return;
@@ -1033,8 +1548,10 @@ window.deleteService =
 
     if (error) {
 
+      console.error(error);
+
       alert(
-        "تعذر الحذف."
+        "تعذر حذف الخدمة."
       );
 
       return;
@@ -1048,34 +1565,38 @@ window.deleteService =
 
 
 document
-  .getElementById("closeService")
+  .getElementById(
+    "closeService"
+  )
   .addEventListener(
     "click",
     () => {
 
-      document
-        .getElementById(
+      hide(
+        document.getElementById(
           "serviceModal"
         )
-        .classList.add(
-          "hidden"
-        );
+      );
 
     }
   );
 
 
-/* =========================
+/* =========================================
    PROJECTS
-========================= */
+========================================= */
+
+let projectEditingId =
+  null;
+
+
+const projectsList =
+  document.getElementById(
+    "projectsList"
+  );
+
 
 async function loadProjects() {
-
-  const list =
-    document.getElementById(
-      "projectsList"
-    );
-
 
   const {
     data,
@@ -1102,10 +1623,12 @@ async function loadProjects() {
 
     console.error(error);
 
-    list.innerHTML =
-      `<div class="empty">
-        حدث خطأ.
-      </div>`;
+    projectsList.innerHTML =
+      `
+        <div class="empty">
+          حدث خطأ في تحميل المشاريع.
+        </div>
+      `;
 
     return;
 
@@ -1120,94 +1643,112 @@ async function loadProjects() {
 
   if (!data.length) {
 
-    list.innerHTML =
-      `<div class="empty">
-        لا توجد مشاريع.
-      </div>`;
+    projectsList.innerHTML =
+      `
+        <div class="empty">
+          لا توجد مشاريع. اضغط «إضافة مشروع».
+        </div>
+      `;
 
     return;
 
   }
 
 
-  list.innerHTML =
+  projectsList.innerHTML =
     data
-      .map((item) => {
+      .map(
+        (item) => {
 
-        return `
-          <article class="admin-item">
+          return `
+            <article class="admin-item">
 
-            ${
-              item.image_url
-                ? `
-                  <img
-                    src="${escapeHTML(
-                      item.image_url
-                    )}"
-                    alt=""
+              ${
+                item.image_url
+                  ? `
+                    <img
+                      class="admin-item-image"
+                      src="${escapeHTML(
+                        item.image_url
+                      )}"
+                      alt=""
+                    >
+                  `
+                  : `
+                    <div
+                      class="admin-item-image"
+                    ></div>
+                  `
+              }
+
+
+              <div class="admin-item-body">
+
+                <h3>
+                  ${escapeHTML(
+                    item.title
+                  )}
+                </h3>
+
+
+                <p>
+                  ${escapeHTML(
+                    item.description ||
+                    ""
+                  )}
+                </p>
+
+
+                <div class="item-meta">
+                  ${escapeHTML(
+                    item.category ||
+                    ""
+                  )}
+                </div>
+
+
+                <div class="item-actions">
+
+                  <button
+                    class="edit-btn"
+                    onclick="openEditProject('${item.id}')"
                   >
-                `
-                : ""
-            }
-
-            <div class="admin-item-content">
-
-              <h4>
-                ${escapeHTML(
-                  item.title
-                )}
-              </h4>
-
-              <p>
-                ${escapeHTML(
-                  item.description ||
-                  ""
-                )}
-              </p>
-
-              <div class="price">
-                ${escapeHTML(
-                  item.category ||
-                  ""
-                )}
-              </div>
+                    تعديل
+                  </button>
 
 
-              <div class="actions">
+                  <button
+                    class="delete-btn"
+                    onclick="removeProject('${item.id}')"
+                  >
+                    حذف
+                  </button>
 
-                <button
-                  class="edit"
-                  onclick="editProject('${item.id}')"
-                >
-                  تعديل
-                </button>
-
-
-                <button
-                  class="delete"
-                  onclick="deleteProject('${item.id}')"
-                >
-                  حذف
-                </button>
+                </div>
 
               </div>
 
-            </div>
+            </article>
+          `;
 
-          </article>
-        `;
-
-      })
+        }
+      )
       .join("");
 
 }
 
 
 document
-  .getElementById("addProject")
+  .getElementById(
+    "addProject"
+  )
   .addEventListener(
     "click",
     () => {
+
+      projectEditingId =
+        null;
+
 
       document
         .getElementById(
@@ -1217,29 +1758,36 @@ document
 
 
       document.getElementById(
-        "projectId"
-      ).value = "";
-
-
-      document.getElementById(
         "projectModalTitle"
       ).textContent =
         "إضافة مشروع";
 
 
-      document
-        .getElementById(
+      document.getElementById(
+        "projectImageName"
+      ).textContent =
+        "لم يتم اختيار صورة";
+
+
+      setImagePreview(
+        document.getElementById(
+          "projectImagePreview"
+        ),
+        ""
+      );
+
+
+      show(
+        document.getElementById(
           "projectModal"
         )
-        .classList.remove(
-          "hidden"
-        );
+      );
 
     }
   );
 
 
-window.editProject =
+window.openEditProject =
   async function(id) {
 
     const {
@@ -1267,40 +1815,55 @@ window.editProject =
     }
 
 
-    document.getElementById(
-      "projectId"
-    ).value =
-      data.id;
+    projectEditingId =
+      id;
 
 
     document.getElementById(
       "projectTitle"
     ).value =
-      data.title || "";
-
+      data.title ||
+      "";
 
     document.getElementById(
       "projectDescription"
     ).value =
-      data.description || "";
-
+      data.description ||
+      "";
 
     document.getElementById(
       "projectCategory"
     ).value =
-      data.category || "";
-
-
-    document.getElementById(
-      "projectImage"
-    ).value =
-      data.image_url || "";
-
+      data.category ||
+      "";
 
     document.getElementById(
       "projectUrl"
     ).value =
-      data.project_url || "";
+      data.project_url ||
+      "";
+
+
+    document.getElementById(
+      "projectImageFile"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "projectImageName"
+    ).textContent =
+      data.image_url
+        ? "الصورة الحالية"
+        : "لم يتم اختيار صورة";
+
+
+    setImagePreview(
+      document.getElementById(
+        "projectImagePreview"
+      ),
+      data.image_url
+    );
 
 
     document.getElementById(
@@ -1309,19 +1872,56 @@ window.editProject =
       "تعديل المشروع";
 
 
-    document
-      .getElementById(
+    show(
+      document.getElementById(
         "projectModal"
       )
-      .classList.remove(
-        "hidden"
-      );
+    );
 
   };
 
 
 document
-  .getElementById("projectForm")
+  .getElementById(
+    "projectImageFile"
+  )
+  .addEventListener(
+    "change",
+    (event) => {
+
+      const file =
+        event.target.files[0];
+
+
+      document.getElementById(
+        "projectImageName"
+      ).textContent =
+        file
+          ? file.name
+          : "لم يتم اختيار صورة";
+
+
+      if (file) {
+
+        setImagePreview(
+          document.getElementById(
+            "projectImagePreview"
+          ),
+          URL.createObjectURL(
+            file
+          )
+        );
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "projectForm"
+  )
   .addEventListener(
     "submit",
     async (event) => {
@@ -1329,103 +1929,187 @@ document
       event.preventDefault();
 
 
-      const id =
-        document.getElementById(
-          "projectId"
-        ).value;
+      const button =
+        event.target.querySelector(
+          "button[type='submit']"
+        );
 
 
-      const item = {
+      button.disabled = true;
 
-        title:
-          document.getElementById(
-            "projectTitle"
-          ).value.trim(),
-
-        description:
-          document.getElementById(
-            "projectDescription"
-          ).value.trim(),
-
-        category:
-          document.getElementById(
-            "projectCategory"
-          ).value.trim(),
-
-        image_url:
-          document.getElementById(
-            "projectImage"
-          ).value.trim(),
-
-        project_url:
-          document.getElementById(
-            "projectUrl"
-          ).value.trim()
-
-      };
+      button.textContent =
+        "جاري الحفظ...";
 
 
-      let error;
+      try {
+
+        let imageUrl = "";
 
 
-      if (id) {
+        if (
+          projectEditingId
+        ) {
 
-        const result =
-          await supabaseClient
-            .from("projects")
-            .update(item)
-            .eq(
-              "id",
-              id
+          const {
+            data: old
+          } =
+            await supabaseClient
+              .from("projects")
+              .select("image_url")
+              .eq(
+                "id",
+                projectEditingId
+              )
+              .single();
+
+
+          imageUrl =
+            old?.image_url ||
+            "";
+
+        }
+
+
+        const file =
+          document
+            .getElementById(
+              "projectImageFile"
+            )
+            .files[0];
+
+
+        if (file) {
+
+          imageUrl =
+            await uploadImage(
+              file,
+              "projects"
             );
 
-        error =
-          result.error;
-
-      } else {
-
-        const result =
-          await supabaseClient
-            .from("projects")
-            .insert([item]);
-
-        error =
-          result.error;
-
-      }
+        }
 
 
-      if (error) {
+        const payload = {
+
+          title:
+            document
+              .getElementById(
+                "projectTitle"
+              )
+              .value
+              .trim(),
+
+          description:
+            document
+              .getElementById(
+                "projectDescription"
+              )
+              .value
+              .trim(),
+
+          category:
+            document
+              .getElementById(
+                "projectCategory"
+              )
+              .value
+              .trim(),
+
+          image_url:
+            imageUrl,
+
+          project_url:
+            document
+              .getElementById(
+                "projectUrl"
+              )
+              .value
+              .trim()
+
+        };
+
+
+        if (
+          projectEditingId
+        ) {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("projects")
+              .update(
+                payload
+              )
+              .eq(
+                "id",
+                projectEditingId
+              );
+
+
+          if (error) {
+            throw error;
+          }
+
+        } else {
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("projects")
+              .insert([
+                payload
+              ]);
+
+
+          if (error) {
+            throw error;
+          }
+
+        }
+
+
+        hide(
+          document.getElementById(
+            "projectModal"
+          )
+        );
+
+
+        await loadProjects();
+
+        button.disabled = false;
+
+        button.textContent =
+          "حفظ المشروع";
+
+      } catch (error) {
+
+        console.error(error);
 
         alert(
-          "حدث خطأ أثناء الحفظ."
+          error.message ||
+          "حدث خطأ أثناء حفظ المشروع."
         );
 
-        return;
+        button.disabled = false;
+
+        button.textContent =
+          "حفظ المشروع";
 
       }
 
-
-      document
-        .getElementById(
-          "projectModal"
-        )
-        .classList.add(
-          "hidden"
-        );
+    }
+  );
 
 
-      await loadProjects();
-
-  });
-
-
-window.deleteProject =
+window.removeProject =
   async function(id) {
 
     if (
       !confirm(
-        "هل تريد حذف المشروع؟"
+        "هل تريد حذف هذا المشروع؟"
       )
     ) {
       return;
@@ -1446,8 +2130,10 @@ window.deleteProject =
 
     if (error) {
 
+      console.error(error);
+
       alert(
-        "تعذر الحذف."
+        "تعذر حذف المشروع."
       );
 
       return;
@@ -1461,26 +2147,26 @@ window.deleteProject =
 
 
 document
-  .getElementById("closeProject")
+  .getElementById(
+    "closeProject"
+  )
   .addEventListener(
     "click",
     () => {
 
-      document
-        .getElementById(
+      hide(
+        document.getElementById(
           "projectModal"
         )
-        .classList.add(
-          "hidden"
-        );
+      );
 
     }
   );
 
 
-/* =========================
+/* =========================================
    ORDERS
-========================= */
+========================================= */
 
 async function loadOrders() {
 
@@ -1512,7 +2198,7 @@ async function loadOrders() {
     list.innerHTML =
       `
         <div class="empty">
-          حدث خطأ أثناء تحميل الطلبات.
+          حدث خطأ في تحميل الطلبات.
         </div>
       `;
 
@@ -1527,12 +2213,18 @@ async function loadOrders() {
     data.length;
 
 
+  document.getElementById(
+    "ordersBadge"
+  ).textContent =
+    data.length;
+
+
   if (!data.length) {
 
     list.innerHTML =
       `
         <div class="empty">
-          لا توجد طلبات مواقع.
+          لا توجد طلبات مواقع حاليًا.
         </div>
       `;
 
@@ -1543,267 +2235,299 @@ async function loadOrders() {
 
   list.innerHTML =
     data
-      .map((order) => {
+      .map(
+        (order) => {
 
-        const date =
-          order.created_at
-            ? new Date(
-                order.created_at
-              ).toLocaleString(
-                "fr-DZ"
-              )
-            : "";
+          const status =
+            order.status ||
+            "new";
 
 
-        return `
-          <article class="order-card">
+          const statusOptions = [
 
-            <div class="order-top">
+            ["new", "جديدة"],
 
-              <div>
+            ["contacted", "تم التواصل"],
 
-                <div class="order-name">
-                  ${escapeHTML(
-                    order.full_name
-                  )}
+            ["working", "قيد العمل"],
+
+            ["done", "مكتملة"],
+
+            ["cancelled", "ملغاة"]
+
+          ];
+
+
+          return `
+            <article class="order-card">
+
+              <div class="order-top">
+
+                <div>
+
+                  <div class="order-name">
+                    ${escapeHTML(
+                      order.full_name
+                    )}
+                  </div>
+
+                  <div>
+                    📞 ${escapeHTML(
+                      order.phone
+                    )}
+                  </div>
+
                 </div>
+
 
                 <div class="order-date">
                   ${escapeHTML(
-                    date
+                    formatDate(
+                      order.created_at
+                    )
                   )}
                 </div>
 
               </div>
 
-            </div>
+
+              <div class="order-grid">
+
+                <div>
+                  <span>🏪 المشروع</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.business_name ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
 
 
-            <div class="order-grid">
+                <div>
+                  <span>📌 النشاط</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.business_type ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
 
-              <div>
-                <span>📱 الهاتف</span>
-                <strong>
-                  ${escapeHTML(
-                    order.phone
-                  )}
-                </strong>
+
+                <div>
+                  <span>🌐 نوع الموقع</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.website_type ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>💰 الميزانية</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.budget ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>📅 المدة</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.deadline ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>📸 Instagram</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.instagram ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>✉️ Email</span>
+                  <strong>
+                    ${escapeHTML(
+                      order.email ||
+                      "-"
+                    )}
+                  </strong>
+                </div>
+
               </div>
 
-              <div>
-                <span>✉️ Email</span>
-                <strong>
+
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  💡 فكرة الموقع
+                </div>
+
+                <p>
                   ${escapeHTML(
-                    order.email ||
+                    order.idea ||
                     "-"
                   )}
-                </strong>
+                </p>
+
               </div>
 
-              <div>
-                <span>🏪 المشروع</span>
-                <strong>
+
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  📄 الصفحات المطلوبة
+                </div>
+
+                <p>
                   ${escapeHTML(
-                    order.business_name ||
+                    order.pages ||
                     "-"
                   )}
-                </strong>
+                </p>
+
               </div>
 
-              <div>
-                <span>📌 النشاط</span>
-                <strong>
+
+              <div class="order-block">
+
+                <div class="order-block-title">
+                  ⚡ المزايا
+                </div>
+
+                <p>
                   ${escapeHTML(
-                    order.business_type ||
+                    order.features ||
                     "-"
                   )}
-                </strong>
+                </p>
+
               </div>
 
-              <div>
-                <span>🌐 نوع الموقع</span>
-                <strong>
-                  ${escapeHTML(
-                    order.website_type ||
-                    "-"
-                  )}
-                </strong>
-              </div>
 
-              <div>
-                <span>💰 الميزانية</span>
-                <strong>
-                  ${escapeHTML(
-                    order.budget ||
-                    "-"
-                  )}
-                </strong>
-              </div>
+              ${
+                order.notes
+                  ? `
+                    <div class="order-block">
 
-              <div>
-                <span>📅 المدة</span>
-                <strong>
-                  ${escapeHTML(
-                    order.deadline ||
-                    "-"
-                  )}
-                </strong>
-              </div>
+                      <div class="order-block-title">
+                        📝 ملاحظات
+                      </div>
 
-              <div>
-                <span>📸 Instagram</span>
-                <strong>
-                  ${escapeHTML(
-                    order.instagram ||
-                    "-"
-                  )}
-                </strong>
-              </div>
+                      <p>
+                        ${escapeHTML(
+                          order.notes
+                        )}
+                      </p>
 
-            </div>
-
-
-            <div class="block">
-
-              <div class="block-title">
-                💡 فكرة الموقع
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.idea ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            <div class="block">
-
-              <div class="block-title">
-                📄 الصفحات المطلوبة
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.pages ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            <div class="block">
-
-              <div class="block-title">
-                ⚡ المزايا المطلوبة
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.features ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            <div class="block">
-
-              <div class="block-title">
-                📝 الملاحظات
-              </div>
-
-              <p>
-                ${escapeHTML(
-                  order.notes ||
-                  "-"
-                )}
-              </p>
-
-            </div>
-
-
-            ${
-              order.reference_url
-                ? `
-                  <div class="block">
-
-                    <div class="block-title">
-                      🔗 موقع مرجعي
                     </div>
-
-                    <a
-                      class="visit-btn"
-                      href="${escapeHTML(
-                        order.reference_url
-                      )}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      فتح الرابط
-                    </a>
-
-                  </div>
-                `
-                : ""
-            }
+                  `
+                  : ""
+              }
 
 
-            <div class="order-actions">
+              <div class="order-controls">
 
-              <button
-                class="status-btn"
-                onclick="toggleOrder(
-                  '${order.id}',
-                  '${escapeHTML(
-                    order.status ||
-                    "new"
-                  )}'
-                )"
-              >
+                <select
+                  class="status-select"
+                  onchange="changeOrderStatus(
+                    '${order.id}',
+                    this.value
+                  )"
+                >
+
+                  ${
+                    statusOptions
+                      .map(
+                        ([value,label]) =>
+                          `
+                            <option
+                              value="${value}"
+                              ${
+                                value === status
+                                  ? "selected"
+                                  : ""
+                              }
+                            >
+                              ${label}
+                            </option>
+                          `
+                      )
+                      .join("")
+                  }
+
+                </select>
+
+
+                <a
+                  href="${toWhatsApp(
+                    order.phone
+                  )}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="whatsapp-order"
+                >
+                  💬 WhatsApp
+                </a>
+
+
                 ${
-                  order.status === "done"
-                    ? "↩️ إرجاع للجديدة"
-                    : "✅ تمت المعالجة"
+                  order.reference_url
+                    ? `
+                      <a
+                        href="${escapeHTML(
+                          order.reference_url
+                        )}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="whatsapp-order"
+                      >
+                        🔗 المرجع
+                      </a>
+                    `
+                    : ""
                 }
-              </button>
 
 
-              <button
-                class="delete-order"
-                onclick="deleteOrder(
-                  '${order.id}'
-                )"
-              >
-                حذف الطلب
-              </button>
+                <button
+                  class="danger-btn"
+                  onclick="deleteOrder('${order.id}')"
+                >
+                  حذف
+                </button>
 
-            </div>
+              </div>
 
-          </article>
-        `;
+            </article>
+          `;
 
-      })
+        }
+      )
       .join("");
 
 }
 
 
-window.toggleOrder =
+window.changeOrderStatus =
   async function(
     id,
-    currentStatus
+    status
   ) {
-
-    const status =
-      currentStatus === "done"
-        ? "new"
-        : "done";
-
 
     const {
       error
@@ -1822,15 +2546,12 @@ window.toggleOrder =
     if (error) {
 
       alert(
-        "تعذر تغيير الحالة."
+        "تعذر تغيير حالة الطلب."
       );
 
       return;
 
     }
-
-
-    await loadOrders();
 
   };
 
@@ -1840,7 +2561,7 @@ window.deleteOrder =
 
     if (
       !confirm(
-        "هل تريد حذف الطلب؟"
+        "هل تريد حذف هذا الطلب؟"
       )
     ) {
       return;
@@ -1875,9 +2596,9 @@ window.deleteOrder =
   };
 
 
-/* =========================
+/* =========================================
    MESSAGES
-========================= */
+========================================= */
 
 async function loadMessages() {
 
@@ -1906,6 +2627,13 @@ async function loadMessages() {
 
     console.error(error);
 
+    list.innerHTML =
+      `
+        <div class="empty">
+          حدث خطأ في تحميل الرسائل.
+        </div>
+      `;
+
     return;
 
   }
@@ -1917,12 +2645,18 @@ async function loadMessages() {
     data.length;
 
 
+  document.getElementById(
+    "messagesBadge"
+  ).textContent =
+    data.length;
+
+
   if (!data.length) {
 
     list.innerHTML =
       `
         <div class="empty">
-          لا توجد رسائل.
+          لا توجد رسائل حاليًا.
         </div>
       `;
 
@@ -1933,100 +2667,103 @@ async function loadMessages() {
 
   list.innerHTML =
     data
-      .map((message) => {
+      .map(
+        (message) => {
 
-        return `
-          <article class="order-card">
+          return `
+            <article class="order-card">
 
-            <div class="order-top">
-
-              <div>
-
-                <div class="order-name">
-                  ${escapeHTML(
-                    message.name
-                  )}
-                </div>
+              <div class="order-top">
 
                 <div>
-                  📱 ${escapeHTML(
-                    message.phone ||
-                    "-"
+
+                  <div class="order-name">
+                    ${escapeHTML(
+                      message.name
+                    )}
+                  </div>
+
+                  <div>
+                    📞 ${escapeHTML(
+                      message.phone ||
+                      "-"
+                    )}
+                  </div>
+
+                </div>
+
+
+                <div class="order-date">
+                  ${escapeHTML(
+                    formatDate(
+                      message.created_at
+                    )
                   )}
                 </div>
 
               </div>
 
-            </div>
 
+              <div class="order-block">
 
-            <div class="block">
+                <div class="order-block-title">
+                  ✉️ Email
+                </div>
 
-              <div class="block-title">
-                ✉️ Email
+                <p>
+                  ${escapeHTML(
+                    message.email ||
+                    "-"
+                  )}
+                </p>
+
               </div>
 
-              <p>
-                ${escapeHTML(
-                  message.email ||
-                  "-"
-                )}
-              </p>
 
-            </div>
+              <div class="order-block">
 
+                <div class="order-block-title">
+                  💬 الرسالة
+                </div>
 
-            <div class="block">
+                <p>
+                  ${escapeHTML(
+                    message.message ||
+                    "-"
+                  )}
+                </p>
 
-              <div class="block-title">
-                💬 الرسالة
               </div>
 
-              <p>
-                ${escapeHTML(
-                  message.message ||
-                  "-"
-                )}
-              </p>
 
-            </div>
+              <div class="order-controls">
 
-
-            <div class="order-actions">
-
-              <button
-                class="status-btn"
-                onclick="toggleMessage(
-                  '${message.id}',
-                  '${escapeHTML(
-                    message.status ||
-                    "new"
-                  )}'
-                )"
-              >
-                ${
-                  message.status === "read"
-                    ? "↩️ غير مقروءة"
-                    : "✅ تمت القراءة"
-                }
-              </button>
+                <button
+                  class="status-select"
+                  onclick="toggleMessage('${message.id}','${escapeHTML(message.status || "new")}')"
+                >
+                  ${
+                    message.status === "read"
+                      ? "↩️ غير مقروءة"
+                      : "✅ تمت القراءة"
+                  }
+                </button>
 
 
-              <button
-                class="delete-order"
-                onclick="deleteMessage(
-                  '${message.id}'
-                )"
-              >
-                حذف
-              </button>
+                <button
+                  class="danger-btn"
+                  onclick="deleteMessage('${message.id}')"
+                >
+                  حذف
+                </button>
 
-            </div>
+              </div>
 
-          </article>
-        `;
+            </article>
+          `;
 
-      })
+        }
+      )
       .join("");
 
 }
@@ -2061,7 +2798,7 @@ window.toggleMessage =
     if (error) {
 
       alert(
-        "تعذر تغيير الحالة."
+        "تعذر تغيير حالة الرسالة."
       );
 
       return;
@@ -2101,7 +2838,7 @@ window.deleteMessage =
     if (error) {
 
       alert(
-        "تعذر الحذف."
+        "تعذر حذف الرسالة."
       );
 
       return;
@@ -2114,9 +2851,9 @@ window.deleteMessage =
   };
 
 
-/* =========================
-   LOAD EVERYTHING
-========================= */
+/* =========================================
+   LOAD ALL
+========================================= */
 
 async function loadEverything() {
 
@@ -2137,8 +2874,8 @@ async function loadEverything() {
 }
 
 
-/* =========================
+/* =========================================
    START
-========================= */
+========================================= */
 
 checkSession();
